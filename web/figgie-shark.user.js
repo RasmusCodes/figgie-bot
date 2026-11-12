@@ -5,6 +5,7 @@
 // @description  Lets figgie-bot's Bayesian card-counting SharkBot trade your seat on figgie.com - only at tables where every other seat is a figgie.com bot.
 // @match        https://www.figgie.com/play*
 // @match        https://figgie.com/play*
+// @license      MIT
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==

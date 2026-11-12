@@ -621,3 +621,9 @@ tools/
   optimize.py            seeded parameter search on the arena (train / val / unseen tables / holdout)
   info_value.py          what knowing the goal earlier would be worth (the ceiling for probing trades)
 ```
+
+---
+
+## License
+
+MIT; see [LICENSE](LICENSE).
