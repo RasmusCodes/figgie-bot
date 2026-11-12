@@ -1,0 +1,656 @@
+{
+ "argv": [
+  "tools/optimize.py",
+  "--base",
+  "sharklive:read_learn=true,resale_robust=true",
+  "--candidates",
+  "32",
+  "--log",
+  "data/optimize_v13.json"
+ ],
+ "base": "sharklive:read_learn=true,resale_robust=true",
+ "train_tables": [
+  "mixed",
+  "counters",
+  "oracles",
+  "fickle",
+  "strong-mix",
+  "osharks",
+  "self-mix",
+  "spoofed",
+  "baited",
+  "bait2",
+  "bait-pair",
+  "pumped",
+  "pump-pair",
+  "snipers",
+  "holdout",
+  "trio"
+ ],
+ "unseen": [
+  "selfplay",
+  "pennies",
+  "adaptive",
+  "five",
+  "quiet"
+ ],
+ "stages": [
+  {
+   "sessions": 4,
+   "scores": [
+    [
+     -0.61328125,
+     "sharklive:read_learn=true,resale_robust=true,alpha_end=40.4,take_edge=1.11,quote_frac=0.213"
+    ],
+    [
+     -0.6796875,
+     "sharklive:read_learn=true,resale_robust=true,fill_lr_offer=3.7,alpha_end=46.7,hold_dead=5.73"
+    ],
+    [
+     -0.681640625,
+     "sharklive:read_learn=true,resale_robust=true,sticky_halflife=38.9,quote_frac=0.195,hold_goal=27.6"
+    ],
+    [
+     -1.072265625,
+     "sharklive:read_learn=true,resale_robust=true,step_every=3,churn_guard=0.442,take_frac=0.165"
+    ],
+    [
+     -1.189453125,
+     "sharklive:read_learn=true,resale_robust=true,quote_frac=0.148,alpha_end=37.2,open_markup=3.09"
+    ],
+    [
+     -1.5,
+     "sharklive:read_learn=true,resale_robust=true,hold_goal=27,max_pay=52.5,churn_p=0.0677"
+    ],
+    [
+     -1.736328125,
+     "sharklive:read_learn=true,resale_robust=true,sticky_halflife=47.3,take_edge=0.914,alpha_end=32.4"
+    ],
+    [
+     -1.95703125,
+     "sharklive:read_learn=true,resale_robust=true,fill_lr_offer=4.35,max_pay=41.3,adverse=0.0513"
+    ],
+    [
+     -2.0625,
+     "sharklive:read_learn=true,resale_robust=true,open_markup=3.31,fill_lr_offer=3.33,take_frac=0.224"
+    ],
+    [
+     -2.46875,
+     "sharklive:read_learn=true,resale_robust=true,take_frac=0.0682,max_pay=57.7,hold_goal=31.5"
+    ],
+    [
+     -2.56640625,
+     "sharklive:read_learn=true,resale_robust=true,hold_dead=6.35,churn_guard=0.505,sticky_halflife=53.4"
+    ],
+    [
+     -2.734375,
+     "sharklive:read_learn=true,resale_robust=true,fill_lr_offer=2.77,hold_goal=18.6,quote_frac=0.173"
+    ],
+    [
+     -3.1953125,
+     "sharklive:read_learn=true,resale_robust=true,quote_frac=0.222,open_markup=3.97,take_frac=0.167"
+    ],
+    [
+     -3.208984375,
+     "sharklive:read_learn=true,resale_robust=true,alpha_end=47.1,take_frac=0.182,buy_halflife=2.98"
+    ],
+    [
+     -3.52734375,
+     "sharklive:read_learn=true,resale_robust=true,sticky_halflife=20.7,take_edge=0.465,open_markup=3.07"
+    ],
+    [
+     -4.078125,
+     "sharklive:read_learn=true,resale_robust=true,buy_halflife=4.08,hold_dead=7.6,open_frac=0.232"
+    ],
+    [
+     -4.173828125,
+     "sharklive:read_learn=true,resale_robust=true,hold_dead=5.95,churn_p=0.17,alpha_start=3.59"
+    ],
+    [
+     -4.475911458333333,
+     "sharklive:read_learn=true,resale_robust=true,fill_lr_offer=3,adverse=0.00193,alpha_end=23.2"
+    ],
+    [
+     -4.54296875,
+     "sharklive:read_learn=true,resale_robust=true,churn_guard=0.665,max_pay=58.8,take_frac=0.0575"
+    ],
+    [
+     -4.767578125,
+     "sharklive:read_learn=true,resale_robust=true,alpha_end=41.1,take_frac=0.118,open_markup=3.11"
+    ],
+    [
+     -5.203125,
+     "sharklive:read_learn=true,resale_robust=true,step_every=2,sticky_halflife=16.8,quote_edge=0.534"
+    ],
+    [
+     -5.43359375,
+     "sharklive:read_learn=true,resale_robust=true,open_markup=4.15,churn_guard=0.302,alpha_start=5.4"
+    ],
+    [
+     -5.521484375,
+     "sharklive:read_learn=true,resale_robust=true,buy_halflife=7.77,max_pay=60.3,quote_edge=0.011"
+    ],
+    [
+     -5.583984375,
+     "sharklive:read_learn=true,resale_robust=true,hold_goal=28.5,step_every=5,quote_frac=0.314"
+    ],
+    [
+     -5.755859375,
+     "sharklive:read_learn=true,resale_robust=true,alpha_start=5.91,open_frac=0.348,quote_frac=0.136"
+    ],
+    [
+     -6.108072916666668,
+     "sharklive:read_learn=true,resale_robust=true,alpha_end=22.7,open_frac=0.653,quote_edge=0.768"
+    ],
+    [
+     -6.376953125,
+     "sharklive:read_learn=true,resale_robust=true,churn_p=0.147,fill_lr_offer=1.51,max_pay=44.9"
+    ],
+    [
+     -7.669921875,
+     "sharklive:read_learn=true,resale_robust=true,sticky_halflife=11.6,hold_dead=6.64,fill_lr_offer=2.61"
+    ],
+    [
+     -7.697265625,
+     "sharklive:read_learn=true,resale_robust=true,adverse=0.328,hold_goal=35.5,take_edge=0.899"
+    ],
+    [
+     -8.423177083333334,
+     "sharklive:read_learn=true,resale_robust=true,churn_guard=0.651,adverse=0.326,hold_dead=2.64"
+    ],
+    [
+     -8.78125,
+     "sharklive:read_learn=true,resale_robust=true,step_every=2,hold_goal=17.1,take_edge=0.583"
+    ],
+    [
+     -10.6328125,
+     "sharklive:read_learn=true,resale_robust=true,alpha_start=2.9,take_edge=2.72,adverse=0.178"
+    ]
+   ]
+  },
+  {
+   "sessions": 8,
+   "scores": [
+    [
+     -0.4375,
+     "sharklive:read_learn=true,resale_robust=true,quote_frac=0.148,alpha_end=37.2,open_markup=3.09"
+    ],
+    [
+     -0.6728515625,
+     "sharklive:read_learn=true,resale_robust=true,open_markup=3.31,fill_lr_offer=3.33,take_frac=0.224"
+    ],
+    [
+     -0.9638671875,
+     "sharklive:read_learn=true,resale_robust=true,fill_lr_offer=4.35,max_pay=41.3,adverse=0.0513"
+    ],
+    [
+     -1.54296875,
+     "sharklive:read_learn=true,resale_robust=true,fill_lr_offer=3.7,alpha_end=46.7,hold_dead=5.73"
+    ],
+    [
+     -1.8203125,
+     "sharklive:read_learn=true,resale_robust=true,hold_goal=27,max_pay=52.5,churn_p=0.0677"
+    ],
+    [
+     -1.8212890625,
+     "sharklive:read_learn=true,resale_robust=true,hold_dead=6.35,churn_guard=0.505,sticky_halflife=53.4"
+    ],
+    [
+     -1.8623046875,
+     "sharklive:read_learn=true,resale_robust=true,alpha_end=47.1,take_frac=0.182,buy_halflife=2.98"
+    ],
+    [
+     -2.103515625,
+     "sharklive:read_learn=true,resale_robust=true,step_every=3,churn_guard=0.442,take_frac=0.165"
+    ],
+    [
+     -2.4638671875,
+     "sharklive:read_learn=true,resale_robust=true,sticky_halflife=38.9,quote_frac=0.195,hold_goal=27.6"
+    ],
+    [
+     -2.482421875,
+     "sharklive:read_learn=true,resale_robust=true,alpha_end=40.4,take_edge=1.11,quote_frac=0.213"
+    ],
+    [
+     -2.6376953125,
+     "sharklive:read_learn=true,resale_robust=true,quote_frac=0.222,open_markup=3.97,take_frac=0.167"
+    ],
+    [
+     -2.6416015625,
+     "sharklive:read_learn=true,resale_robust=true,sticky_halflife=20.7,take_edge=0.465,open_markup=3.07"
+    ],
+    [
+     -3.060546875,
+     "sharklive:read_learn=true,resale_robust=true,buy_halflife=4.08,hold_dead=7.6,open_frac=0.232"
+    ],
+    [
+     -3.2939453125,
+     "sharklive:read_learn=true,resale_robust=true,sticky_halflife=47.3,take_edge=0.914,alpha_end=32.4"
+    ],
+    [
+     -3.572265625,
+     "sharklive:read_learn=true,resale_robust=true,fill_lr_offer=2.77,hold_goal=18.6,quote_frac=0.173"
+    ],
+    [
+     -4.4580078125,
+     "sharklive:read_learn=true,resale_robust=true,take_frac=0.0682,max_pay=57.7,hold_goal=31.5"
+    ]
+   ]
+  },
+  {
+   "sessions": 16,
+   "scores": [
+    [
+     -1.3020833333333333,
+     "sharklive:read_learn=true,resale_robust=true,open_markup=3.31,fill_lr_offer=3.33,take_frac=0.224"
+    ],
+    [
+     -1.466796875,
+     "sharklive:read_learn=true,resale_robust=true,step_every=3,churn_guard=0.442,take_frac=0.165"
+    ],
+    [
+     -1.96484375,
+     "sharklive:read_learn=true,resale_robust=true,fill_lr_offer=3.7,alpha_end=46.7,hold_dead=5.73"
+    ],
+    [
+     -2.33984375,
+     "sharklive:read_learn=true,resale_robust=true,hold_dead=6.35,churn_guard=0.505,sticky_halflife=53.4"
+    ],
+    [
+     -2.84423828125,
+     "sharklive:read_learn=true,resale_robust=true,alpha_end=47.1,take_frac=0.182,buy_halflife=2.98"
+    ],
+    [
+     -3.21240234375,
+     "sharklive:read_learn=true,resale_robust=true,quote_frac=0.148,alpha_end=37.2,open_markup=3.09"
+    ],
+    [
+     -3.27783203125,
+     "sharklive:read_learn=true,resale_robust=true,fill_lr_offer=4.35,max_pay=41.3,adverse=0.0513"
+    ],
+    [
+     -3.37890625,
+     "sharklive:read_learn=true,resale_robust=true,hold_goal=27,max_pay=52.5,churn_p=0.0677"
+    ]
+   ]
+  }
+ ],
+ "val": [
+  [
+   [
+    -0.9241319444444446,
+    0.06944444444444443,
+    -1.9177083333333336
+   ],
+   "sharklive:read_learn=true,resale_robust=true,step_every=3,churn_guard=0.442,take_frac=0.165",
+   {
+    "mixed": [
+     -2.3125,
+     3.613923018456997
+    ],
+    "counters": [
+     0.625,
+     3.6760887276197964
+    ],
+    "oracles": [
+     0.734375,
+     2.6118535035407966
+    ],
+    "fickle": [
+     1.03125,
+     2.357979162157008
+    ],
+    "strong-mix": [
+     -1.84375,
+     3.3024676222233174
+    ],
+    "osharks": [
+     0.046875,
+     2.092907510846653
+    ],
+    "selfplay": [
+     -2.84375,
+     4.279880729938627
+    ],
+    "self-mix": [
+     1.84375,
+     5.9211782945485885
+    ],
+    "spoofed": [
+     3.453125,
+     4.805419355508078
+    ],
+    "baited": [
+     -0.6875,
+     2.9384683510291545
+    ],
+    "bait2": [
+     0.34375,
+     1.6403873716798318
+    ],
+    "bait-pair": [
+     2.203125,
+     2.44804687774254
+    ],
+    "pumped": [
+     -1.635416666666667,
+     1.661796269185178
+    ],
+    "pump-pair": [
+     0.75,
+     2.7311365155675884
+    ],
+    "snipers": [
+     1.046875,
+     1.617877523884817
+    ],
+    "pennies": [
+     0.875,
+     2.182655301843758
+    ],
+    "quiet": [
+     -0.890625,
+     1.6158666324787865
+    ],
+    "holdout": [
+     -0.046875,
+     3.113595218118705
+    ],
+    "adaptive": [
+     -0.765625,
+     1.4282111389047722
+    ],
+    "five": [
+     -0.953125,
+     3.1496935325454016
+    ],
+    "trio": [
+     0.484375,
+     1.2913682887897109
+    ]
+   }
+  ],
+  [
+   [
+    -1.4504464285714287,
+    0.09598214285714286,
+    -2.996875
+   ],
+   "sharklive:read_learn=true,resale_robust=true,open_markup=3.31,fill_lr_offer=3.33,take_frac=0.224",
+   {
+    "mixed": [
+     -4.578125,
+     6.2754951809100294
+    ],
+    "counters": [
+     3.6875,
+     6.80928125795961
+    ],
+    "oracles": [
+     -1.421875,
+     2.225646108202814
+    ],
+    "fickle": [
+     0.359375,
+     1.9681338387649518
+    ],
+    "strong-mix": [
+     2.125,
+     6.611218054690577
+    ],
+    "osharks": [
+     -1.953125,
+     3.386622853073299
+    ],
+    "selfplay": [
+     -2.34375,
+     10.466966126621092
+    ],
+    "self-mix": [
+     1.53125,
+     6.290010193089251
+    ],
+    "spoofed": [
+     2.703125,
+     6.901758967752954
+    ],
+    "baited": [
+     -1.65625,
+     3.8447245106119112
+    ],
+    "bait2": [
+     -0.828125,
+     2.211215487529804
+    ],
+    "bait-pair": [
+     -0.40625,
+     3.886906532942789
+    ],
+    "pumped": [
+     0.765625,
+     1.4607622065067034
+    ],
+    "pump-pair": [
+     -3.046875,
+     4.748455382082157
+    ],
+    "snipers": [
+     2.875,
+     4.879745638862747
+    ],
+    "pennies": [
+     0.34375,
+     1.6040017339454467
+    ],
+    "quiet": [
+     1.328125,
+     3.0869736688691836
+    ],
+    "holdout": [
+     2.53125,
+     2.359251624809585
+    ],
+    "adaptive": [
+     2.03125,
+     1.9650339002588901
+    ],
+    "five": [
+     -3.0625,
+     4.726976438485811
+    ],
+    "trio": [
+     1.03125,
+     2.2293092867149085
+    ]
+   }
+  ],
+  [
+   [
+    -1.4698660714285714,
+    -0.033482142857142856,
+    -2.90625
+   ],
+   "sharklive:read_learn=true,resale_robust=true,fill_lr_offer=3.7,alpha_end=46.7,hold_dead=5.73",
+   {
+    "mixed": [
+     -0.625,
+     3.8706898609937737
+    ],
+    "counters": [
+     3.28125,
+     4.83875
+    ],
+    "oracles": [
+     -1.71875,
+     2.51005459352979
+    ],
+    "fickle": [
+     -0.5625,
+     3.3990898904461666
+    ],
+    "strong-mix": [
+     0.15625,
+     6.615888443424158
+    ],
+    "osharks": [
+     -1.921875,
+     3.276875
+    ],
+    "selfplay": [
+     -0.46875,
+     9.229909618327797
+    ],
+    "self-mix": [
+     -4.03125,
+     8.054239146509538
+    ],
+    "spoofed": [
+     11.75,
+     8.94345086268904
+    ],
+    "baited": [
+     -0.515625,
+     0.9312887436012169
+    ],
+    "bait2": [
+     -0.046875,
+     1.9718156224551864
+    ],
+    "bait-pair": [
+     -2.640625,
+     3.754704933896271
+    ],
+    "pumped": [
+     0.546875,
+     2.323076663025064
+    ],
+    "pump-pair": [
+     -1.8125,
+     4.24859010927939
+    ],
+    "snipers": [
+     -0.90625,
+     1.4827898465954867
+    ],
+    "pennies": [
+     -0.203125,
+     0.9720241846914098
+    ],
+    "quiet": [
+     -0.625,
+     2.0951917175603127
+    ],
+    "holdout": [
+     2.8125,
+     3.1725686885130373
+    ],
+    "adaptive": [
+     0.25,
+     2.18082113740062
+    ],
+    "five": [
+     -4.125,
+     4.726658968023819
+    ],
+    "trio": [
+     0.703125,
+     2.858993153010047
+    ]
+   }
+  ]
+ ],
+ "holdout": {
+  "pick": "sharklive:read_learn=true,resale_robust=true,step_every=3,churn_guard=0.442,take_frac=0.165",
+  "score": [
+   -0.4598958333333334,
+   0.3645833333333333,
+   -1.284375
+  ],
+  "tables": {
+   "mixed": [
+    4.796875,
+    6.593674634245435
+   ],
+   "counters": [
+    -1.03125,
+    2.8940003851358878
+   ],
+   "oracles": [
+    -0.03125,
+    0.5290241606013849
+   ],
+   "fickle": [
+    1.484375,
+    1.7799598471009583
+   ],
+   "strong-mix": [
+    0.4375,
+    3.0638063880299833
+   ],
+   "osharks": [
+    0.6875,
+    3.245826230201898
+   ],
+   "selfplay": [
+    0.25,
+    4.289716093946856
+   ],
+   "self-mix": [
+    -0.578125,
+    2.085005539311187
+   ],
+   "spoofed": [
+    4.671875,
+    4.978529963649746
+   ],
+   "baited": [
+    0.109375,
+    1.2730327858929373
+   ],
+   "bait2": [
+    -0.71875,
+    3.1723715990564534
+   ],
+   "bait-pair": [
+    0.453125,
+    0.6903883078565278
+   ],
+   "pumped": [
+    -2.78125,
+    1.5839175786111261
+   ],
+   "pump-pair": [
+    -0.421875,
+    2.1980559059371076
+   ],
+   "snipers": [
+    1.15625,
+    1.889771784061063
+   ],
+   "pennies": [
+    0.78125,
+    2.055117773389155
+   ],
+   "quiet": [
+    -0.3125,
+    0.3507866160502706
+   ],
+   "holdout": [
+    -1.3125,
+    1.601270719355933
+   ],
+   "adaptive": [
+    -0.359375,
+    0.6798014224450647
+   ],
+   "five": [
+    0.375,
+    6.9775552667105405
+   ],
+   "trio": [
+    0.0,
+    1.7791341527083708
+   ]
+  }
+ }
+}

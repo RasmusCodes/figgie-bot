@@ -1,0 +1,4533 @@
+{
+ "about": "Live rounds played by the bot at private figgie.com tables against three Hard bots, 4 players, 10 cards each. top_bids: highest price any other player bid or paid per suit (spades, clubs, hearts, diamonds) over the round; top_bids_by_bot: the same per other seat (v7 on). pnl includes the $50 ante. Full quote-and-trade logs of the v9-v13 rounds are in live_logs_v9.json, live_logs_v91.json, live_logs_v10.json, live_logs_v11.json, live_logs_v12.json and live_logs_v13.json.",
+ "rounds": [
+  {
+   "version": "v2",
+   "goal": "spades",
+   "dealt": [
+    4,
+    3,
+    0,
+    3
+   ],
+   "final": [
+    0,
+    1,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.55,
+   "top_bids": [
+    11,
+    13,
+    11,
+    11
+   ],
+   "pnl": -22
+  },
+  {
+   "version": "v2",
+   "goal": "spades",
+   "dealt": [
+    2,
+    3,
+    3,
+    2
+   ],
+   "final": [
+    5,
+    0,
+    0,
+    2
+   ],
+   "p_goal_at_bell": 0.91,
+   "top_bids": [
+    11,
+    11,
+    7,
+    7
+   ],
+   "pnl": 19
+  },
+  {
+   "version": "v2",
+   "goal": "hearts",
+   "dealt": [
+    3,
+    3,
+    2,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.62,
+   "top_bids": [
+    13,
+    8,
+    15,
+    16
+   ],
+   "pnl": -17
+  },
+  {
+   "version": "v2",
+   "goal": "clubs",
+   "dealt": [
+    5,
+    2,
+    1,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.84,
+   "top_bids": [
+    8,
+    11,
+    9,
+    13
+   ],
+   "pnl": -14
+  },
+  {
+   "version": "v2",
+   "goal": "clubs",
+   "dealt": [
+    4,
+    2,
+    1,
+    3
+   ],
+   "final": [
+    0,
+    4,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.99,
+   "top_bids": [
+    11,
+    18,
+    8,
+    12
+   ],
+   "pnl": 65
+  },
+  {
+   "version": "v2",
+   "goal": "clubs",
+   "dealt": [
+    2,
+    4,
+    2,
+    2
+   ],
+   "final": [
+    0,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.61,
+   "top_bids": [
+    10,
+    14,
+    16,
+    8
+   ],
+   "pnl": 110
+  },
+  {
+   "version": "v2",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    1,
+    3,
+    4
+   ],
+   "final": [
+    0,
+    0,
+    5,
+    0
+   ],
+   "p_goal_at_bell": 0.97,
+   "top_bids": [
+    11,
+    10,
+    13,
+    11
+   ],
+   "pnl": 33
+  },
+  {
+   "version": "v3",
+   "goal": "clubs",
+   "dealt": [
+    6,
+    2,
+    1,
+    1
+   ],
+   "final": [
+    0,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.95,
+   "top_bids": [
+    17,
+    16,
+    9,
+    12
+   ],
+   "pnl": 105
+  },
+  {
+   "version": "v3",
+   "goal": "clubs",
+   "dealt": [
+    4,
+    2,
+    2,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.98,
+   "top_bids": [
+    14,
+    21,
+    18,
+    10
+   ],
+   "pnl": -29
+  },
+  {
+   "version": "v3",
+   "goal": "spades",
+   "dealt": [
+    5,
+    3,
+    0,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.85,
+   "top_bids": [
+    19,
+    15,
+    12,
+    8
+   ],
+   "pnl": 20
+  },
+  {
+   "version": "v3",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    3,
+    1,
+    4
+   ],
+   "final": [
+    0,
+    0,
+    5,
+    0
+   ],
+   "p_goal_at_bell": 0.94,
+   "top_bids": [
+    14,
+    9,
+    15,
+    14
+   ],
+   "pnl": 64
+  },
+  {
+   "version": "v3",
+   "goal": "diamonds",
+   "dealt": [
+    4,
+    2,
+    1,
+    3
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    5
+   ],
+   "p_goal_at_bell": 0.91,
+   "top_bids": [
+    7,
+    9,
+    11,
+    14
+   ],
+   "pnl": 49
+  },
+  {
+   "version": "v3",
+   "goal": "hearts",
+   "dealt": [
+    1,
+    4,
+    2,
+    3
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.96,
+   "top_bids": [
+    14,
+    10,
+    18,
+    11
+   ],
+   "pnl": -24
+  },
+  {
+   "version": "v3",
+   "goal": "hearts",
+   "dealt": [
+    1,
+    4,
+    2,
+    3
+   ],
+   "final": [
+    0,
+    0,
+    5,
+    0
+   ],
+   "p_goal_at_bell": 0.85,
+   "top_bids": [
+    12,
+    15,
+    16,
+    7
+   ],
+   "pnl": 49
+  },
+  {
+   "version": "v3",
+   "goal": "clubs",
+   "dealt": [
+    4,
+    3,
+    1,
+    2
+   ],
+   "final": [
+    6,
+    5,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.54,
+   "top_bids": [
+    12,
+    13,
+    12,
+    9
+   ],
+   "pnl": 12
+  },
+  {
+   "version": "v3",
+   "goal": "diamonds",
+   "dealt": [
+    1,
+    2,
+    2,
+    5
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    5
+   ],
+   "p_goal_at_bell": 0.98,
+   "top_bids": [
+    9,
+    10,
+    4,
+    14
+   ],
+   "pnl": 57
+  },
+  {
+   "version": "v3",
+   "goal": "diamonds",
+   "dealt": [
+    1,
+    3,
+    4,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    5
+   ],
+   "p_goal_at_bell": 0.4,
+   "top_bids": [
+    10,
+    8,
+    15,
+    11
+   ],
+   "pnl": 120
+  },
+  {
+   "version": "v4",
+   "goal": "diamonds",
+   "dealt": [
+    0,
+    1,
+    4,
+    5
+   ],
+   "final": [
+    0,
+    0,
+    6,
+    4
+   ],
+   "p_goal_at_bell": 0.45,
+   "top_bids": [
+    5,
+    12,
+    11,
+    10
+   ],
+   "pnl": 94
+  },
+  {
+   "version": "v4",
+   "goal": "diamonds",
+   "dealt": [
+    2,
+    3,
+    3,
+    2
+   ],
+   "final": [
+    0,
+    3,
+    0,
+    6
+   ],
+   "p_goal_at_bell": 0.995,
+   "top_bids": [
+    7,
+    10,
+    6,
+    15
+   ],
+   "pnl": 100
+  },
+  {
+   "version": "v4",
+   "goal": "clubs",
+   "dealt": [
+    3,
+    1,
+    2,
+    4
+   ],
+   "final": [
+    0,
+    0,
+    4,
+    0
+   ],
+   "p_goal_at_bell": 0.65,
+   "top_bids": [
+    5,
+    11,
+    10,
+    14
+   ],
+   "pnl": -28
+  },
+  {
+   "version": "v4",
+   "goal": "hearts",
+   "dealt": [
+    0,
+    4,
+    3,
+    3
+   ],
+   "final": [
+    0,
+    0,
+    5,
+    0
+   ],
+   "p_goal_at_bell": 0.75,
+   "top_bids": [
+    7,
+    17,
+    11,
+    7
+   ],
+   "pnl": 62
+  },
+  {
+   "version": "v4",
+   "goal": "hearts",
+   "dealt": [
+    0,
+    1,
+    4,
+    5
+   ],
+   "final": [
+    0,
+    0,
+    5,
+    6
+   ],
+   "p_goal_at_bell": 0.97,
+   "top_bids": [
+    11,
+    11,
+    11,
+    6
+   ],
+   "pnl": 43
+  },
+  {
+   "version": "v5",
+   "goal": "clubs",
+   "dealt": [
+    3,
+    5,
+    2,
+    0
+   ],
+   "final": [
+    1,
+    5,
+    0,
+    5
+   ],
+   "p_goal_at_bell": 0.65,
+   "top_bids": [
+    15,
+    20,
+    9,
+    14
+   ],
+   "pnl": 41
+  },
+  {
+   "version": "v5",
+   "goal": "hearts",
+   "dealt": [
+    1,
+    2,
+    4,
+    3
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    6
+   ],
+   "p_goal_at_bell": 0.83,
+   "top_bids": [
+    10,
+    10,
+    18,
+    12
+   ],
+   "pnl": -32
+  },
+  {
+   "version": "v5",
+   "goal": "diamonds",
+   "dealt": [
+    4,
+    2,
+    3,
+    1
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    5
+   ],
+   "p_goal_at_bell": 0.87,
+   "top_bids": [
+    5,
+    17,
+    12,
+    15
+   ],
+   "pnl": 51
+  },
+  {
+   "version": "v5",
+   "goal": "diamonds",
+   "dealt": [
+    0,
+    2,
+    5,
+    3
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    6
+   ],
+   "p_goal_at_bell": 0.995,
+   "top_bids": [
+    8,
+    9,
+    10,
+    20
+   ],
+   "pnl": 108
+  },
+  {
+   "version": "v5",
+   "goal": "diamonds",
+   "dealt": [
+    3,
+    3,
+    1,
+    3
+   ],
+   "final": [
+    0,
+    8,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.04,
+   "top_bids": [
+    18,
+    14,
+    11,
+    11
+   ],
+   "pnl": -32
+  },
+  {
+   "version": "v5",
+   "goal": "clubs",
+   "dealt": [
+    2,
+    2,
+    4,
+    2
+   ],
+   "final": [
+    6,
+    1,
+    5,
+    0
+   ],
+   "p_goal_at_bell": 0.88,
+   "top_bids": [
+    11,
+    12,
+    10,
+    4
+   ],
+   "pnl": -49
+  },
+  {
+   "version": "v5",
+   "goal": "clubs",
+   "dealt": [
+    5,
+    2,
+    0,
+    3
+   ],
+   "final": [
+    6,
+    0,
+    2,
+    0
+   ],
+   "p_goal_at_bell": 0.88,
+   "top_bids": [
+    10,
+    11,
+    11,
+    8
+   ],
+   "pnl": -35
+  },
+  {
+   "version": "v5",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    3,
+    3,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    6,
+    0
+   ],
+   "p_goal_at_bell": 0.96,
+   "top_bids": [
+    12,
+    7,
+    26,
+    5
+   ],
+   "pnl": 116
+  },
+  {
+   "version": "v5",
+   "goal": "hearts",
+   "dealt": [
+    1,
+    4,
+    4,
+    1
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.02,
+   "top_bids": [
+    14,
+    10,
+    11,
+    6
+   ],
+   "pnl": 15
+  },
+  {
+   "version": "v5",
+   "goal": "diamonds",
+   "dealt": [
+    3,
+    2,
+    3,
+    2
+   ],
+   "final": [
+    5,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.72,
+   "top_bids": [
+    16,
+    12,
+    8,
+    15
+   ],
+   "pnl": -24
+  },
+  {
+   "version": "v6",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    3,
+    2,
+    3
+   ],
+   "final": [
+    3,
+    0,
+    5,
+    6
+   ],
+   "p_goal_at_bell": 0.73,
+   "top_bids": [
+    10,
+    15,
+    12,
+    11
+   ],
+   "pnl": 12
+  },
+  {
+   "version": "v6",
+   "goal": "clubs",
+   "dealt": [
+    2,
+    4,
+    1,
+    3
+   ],
+   "final": [
+    0,
+    6,
+    5,
+    0
+   ],
+   "p_goal_at_bell": 0.93,
+   "top_bids": [
+    8,
+    21,
+    11,
+    11
+   ],
+   "pnl": 73
+  },
+  {
+   "version": "v6",
+   "goal": "spades",
+   "dealt": [
+    3,
+    3,
+    2,
+    2
+   ],
+   "final": [
+    6,
+    0,
+    3,
+    0
+   ],
+   "p_goal_at_bell": 0.99,
+   "top_bids": [
+    16,
+    9,
+    12,
+    11
+   ],
+   "pnl": 127
+  },
+  {
+   "version": "v6",
+   "goal": "spades",
+   "dealt": [
+    3,
+    0,
+    6,
+    1
+   ],
+   "final": [
+    6,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.86,
+   "top_bids": [
+    18,
+    7,
+    13,
+    8
+   ],
+   "pnl": 90
+  },
+  {
+   "version": "v6",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    4,
+    2,
+    2
+   ],
+   "final": [
+    6,
+    0,
+    3,
+    0
+   ],
+   "p_goal_at_bell": 0.25,
+   "top_bids": [
+    15,
+    15,
+    13,
+    13
+   ],
+   "pnl": -42
+  },
+  {
+   "version": "v6",
+   "goal": "hearts",
+   "dealt": [
+    4,
+    2,
+    3,
+    1
+   ],
+   "final": [
+    6,
+    5,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.5,
+   "top_bids": [
+    16,
+    4,
+    22,
+    10
+   ],
+   "pnl": -55
+  },
+  {
+   "version": "v6",
+   "goal": "spades",
+   "dealt": [
+    1,
+    3,
+    2,
+    4
+   ],
+   "final": [
+    6,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.91,
+   "top_bids": [
+    13,
+    12,
+    17,
+    11
+   ],
+   "pnl": 14
+  },
+  {
+   "version": "v6",
+   "goal": "clubs",
+   "dealt": [
+    1,
+    4,
+    3,
+    2
+   ],
+   "final": [
+    0,
+    4,
+    4,
+    8
+   ],
+   "p_goal_at_bell": 0.73,
+   "top_bids": [
+    4,
+    21,
+    7,
+    15
+   ],
+   "pnl": 6
+  },
+  {
+   "version": "v6",
+   "goal": "diamonds",
+   "dealt": [
+    3,
+    2,
+    3,
+    2
+   ],
+   "final": [
+    3,
+    6,
+    0,
+    5
+   ],
+   "p_goal_at_bell": 0.55,
+   "top_bids": [
+    7,
+    17,
+    6,
+    14
+   ],
+   "pnl": 22
+  },
+  {
+   "version": "v6",
+   "goal": "spades",
+   "dealt": [
+    4,
+    3,
+    2,
+    1
+   ],
+   "final": [
+    6,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.93,
+   "top_bids": [
+    20,
+    8,
+    10,
+    17
+   ],
+   "pnl": 113
+  },
+  {
+   "version": "v7",
+   "goal": "diamonds",
+   "dealt": [
+    3,
+    1,
+    3,
+    3
+   ],
+   "final": [
+    0,
+    0,
+    6,
+    0
+   ],
+   "p_goal_at_bell": 0.45,
+   "top_bids": [
+    6,
+    11,
+    7,
+    11
+   ],
+   "pnl": -23,
+   "top_bids_by_bot": [
+    [
+     6,
+     11,
+     7,
+     9
+    ],
+    [
+     4,
+     4,
+     5,
+     11
+    ],
+    [
+     4,
+     6,
+     4,
+     10
+    ]
+   ]
+  },
+  {
+   "version": "v7",
+   "goal": "spades",
+   "dealt": [
+    0,
+    4,
+    3,
+    3
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.99,
+   "top_bids": [
+    15,
+    12,
+    6,
+    8
+   ],
+   "pnl": 8,
+   "top_bids_by_bot": [
+    [
+     15,
+     7,
+     4,
+     4
+    ],
+    [
+     13,
+     12,
+     4,
+     8
+    ],
+    [
+     10,
+     5,
+     6,
+     4
+    ]
+   ]
+  },
+  {
+   "version": "v7",
+   "goal": "diamonds",
+   "dealt": [
+    2,
+    2,
+    4,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    7
+   ],
+   "p_goal_at_bell": 0.98,
+   "top_bids": [
+    4,
+    7,
+    7,
+    11
+   ],
+   "pnl": 132,
+   "top_bids_by_bot": [
+    [
+     4,
+     7,
+     7,
+     11
+    ],
+    [
+     4,
+     4,
+     5,
+     10
+    ],
+    [
+     4,
+     7,
+     4,
+     11
+    ]
+   ]
+  },
+  {
+   "version": "v7",
+   "goal": "clubs",
+   "dealt": [
+    3,
+    3,
+    3,
+    1
+   ],
+   "final": [
+    6,
+    5,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.82,
+   "top_bids": [
+    15,
+    11,
+    17,
+    12
+   ],
+   "pnl": 20,
+   "top_bids_by_bot": [
+    [
+     15,
+     9,
+     10,
+     4
+    ],
+    [
+     13,
+     11,
+     4,
+     4
+    ],
+    [
+     4,
+     8,
+     17,
+     12
+    ]
+   ]
+  },
+  {
+   "version": "v7",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    2,
+    2,
+    4
+   ],
+   "final": [
+    0,
+    0,
+    6,
+    3
+   ],
+   "p_goal_at_bell": 0.8,
+   "top_bids": [
+    4,
+    17,
+    11,
+    7
+   ],
+   "pnl": 121,
+   "top_bids_by_bot": [
+    [
+     4,
+     6,
+     10,
+     4
+    ],
+    [
+     4,
+     17,
+     11,
+     7
+    ],
+    [
+     4,
+     4,
+     9,
+     4
+    ]
+   ]
+  },
+  {
+   "version": "v7",
+   "goal": "spades",
+   "dealt": [
+    1,
+    5,
+    1,
+    3
+   ],
+   "final": [
+    7,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.88,
+   "top_bids": [
+    11,
+    8,
+    13,
+    13
+   ],
+   "pnl": 143,
+   "top_bids_by_bot": [
+    [
+     10,
+     4,
+     13,
+     13
+    ],
+    [
+     11,
+     4,
+     10,
+     4
+    ],
+    [
+     9,
+     8,
+     4,
+     11
+    ]
+   ]
+  },
+  {
+   "version": "v7",
+   "goal": "spades",
+   "dealt": [
+    4,
+    2,
+    3,
+    1
+   ],
+   "final": [
+    6,
+    6,
+    6,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    22,
+    5,
+    14,
+    8
+   ],
+   "pnl": 62,
+   "top_bids_by_bot": [
+    [
+     22,
+     4,
+     14,
+     6
+    ],
+    [
+     9,
+     5,
+     4,
+     8
+    ],
+    [
+     8,
+     4,
+     4,
+     7
+    ]
+   ]
+  },
+  {
+   "version": "v7",
+   "goal": "diamonds",
+   "dealt": [
+    4,
+    0,
+    5,
+    1
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.71,
+   "top_bids": [
+    12,
+    12,
+    15,
+    13
+   ],
+   "pnl": -1,
+   "top_bids_by_bot": [
+    [
+     4,
+     5,
+     11,
+     13
+    ],
+    [
+     12,
+     12,
+     15,
+     10
+    ],
+    [
+     10,
+     7,
+     4,
+     9
+    ]
+   ]
+  },
+  {
+   "version": "v7",
+   "goal": "diamonds",
+   "dealt": [
+    5,
+    0,
+    3,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.25,
+   "top_bids": [
+    11,
+    9,
+    8,
+    10
+   ],
+   "pnl": 8,
+   "top_bids_by_bot": [
+    [
+     11,
+     8,
+     4,
+     10
+    ],
+    [
+     6,
+     9,
+     8,
+     10
+    ],
+    [
+     3,
+     5,
+     7,
+     9
+    ]
+   ]
+  },
+  {
+   "version": "v7",
+   "goal": "clubs",
+   "dealt": [
+    5,
+    2,
+    2,
+    1
+   ],
+   "final": [
+    0,
+    4,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.51,
+   "top_bids": [
+    9,
+    9,
+    9,
+    12
+   ],
+   "pnl": 5,
+   "top_bids_by_bot": [
+    [
+     4,
+     9,
+     4,
+     4
+    ],
+    [
+     4,
+     7,
+     9,
+     12
+    ],
+    [
+     9,
+     8,
+     4,
+     11
+    ]
+   ]
+  },
+  {
+   "version": "v8",
+   "goal": "hearts",
+   "dealt": [
+    3,
+    3,
+    1,
+    3
+   ],
+   "final": [
+    5,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.95,
+   "top_bids": [
+    16,
+    11,
+    14,
+    8
+   ],
+   "pnl": -5,
+   "top_bids_by_bot": [
+    [
+     16,
+     3,
+     14,
+     8
+    ],
+    [
+     4,
+     7,
+     10,
+     7
+    ],
+    [
+     4,
+     11,
+     11,
+     6
+    ]
+   ]
+  },
+  {
+   "version": "v8",
+   "goal": "spades",
+   "dealt": [
+    3,
+    2,
+    3,
+    2
+   ],
+   "final": [
+    5,
+    5,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    13,
+    12,
+    6,
+    7
+   ],
+   "pnl": 29,
+   "top_bids_by_bot": [
+    [
+     9,
+     6,
+     6,
+     7
+    ],
+    [
+     13,
+     12,
+     4,
+     4
+    ],
+    [
+     9,
+     4,
+     4,
+     5
+    ]
+   ]
+  },
+  {
+   "version": "v8",
+   "goal": "spades",
+   "dealt": [
+    3,
+    4,
+    2,
+    1
+   ],
+   "final": [
+    6,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    22,
+    7,
+    7,
+    10
+   ],
+   "pnl": 127,
+   "top_bids_by_bot": [
+    [
+     7,
+     7,
+     7,
+     9
+    ],
+    [
+     22,
+     6,
+     4,
+     4
+    ],
+    [
+     9,
+     4,
+     7,
+     10
+    ]
+   ]
+  },
+  {
+   "version": "v8",
+   "goal": "spades",
+   "dealt": [
+    2,
+    2,
+    4,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.99,
+   "top_bids": [
+    16,
+    9,
+    7,
+    14
+   ],
+   "pnl": 16,
+   "top_bids_by_bot": [
+    [
+     16,
+     9,
+     4,
+     14
+    ],
+    [
+     15,
+     8,
+     7,
+     4
+    ],
+    [
+     9,
+     4,
+     7,
+     4
+    ]
+   ]
+  },
+  {
+   "version": "v8",
+   "goal": "diamonds",
+   "dealt": [
+    4,
+    1,
+    4,
+    1
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    8,
+    6,
+    16,
+    19
+   ],
+   "pnl": 11,
+   "top_bids_by_bot": [
+    [
+     8,
+     4,
+     16,
+     14
+    ],
+    [
+     4,
+     6,
+     7,
+     19
+    ],
+    [
+     6,
+     5,
+     4,
+     9
+    ]
+   ]
+  },
+  {
+   "version": "v8",
+   "goal": "hearts",
+   "dealt": [
+    3,
+    2,
+    3,
+    2
+   ],
+   "final": [
+    0,
+    5,
+    6,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    10,
+    14,
+    20,
+    12
+   ],
+   "pnl": 80,
+   "top_bids_by_bot": [
+    [
+     10,
+     3,
+     9,
+     8
+    ],
+    [
+     4,
+     14,
+     10,
+     4
+    ],
+    [
+     4,
+     7,
+     20,
+     12
+    ]
+   ]
+  },
+  {
+   "version": "v8",
+   "goal": "clubs",
+   "dealt": [
+    4,
+    3,
+    1,
+    2
+   ],
+   "final": [
+    3,
+    5,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    13,
+    15,
+    12,
+    9
+   ],
+   "pnl": 62,
+   "top_bids_by_bot": [
+    [
+     13,
+     11,
+     11,
+     9
+    ],
+    [
+     4,
+     15,
+     12,
+     4
+    ],
+    [
+     12,
+     9,
+     4,
+     4
+    ]
+   ]
+  },
+  {
+   "version": "v8",
+   "goal": "clubs",
+   "dealt": [
+    4,
+    1,
+    4,
+    1
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    12,
+    16,
+    17,
+    5
+   ],
+   "pnl": 0,
+   "top_bids_by_bot": [
+    [
+     12,
+     16,
+     17,
+     4
+    ],
+    [
+     4,
+     10,
+     10,
+     5
+    ],
+    [
+     9,
+     14,
+     4,
+     4
+    ]
+   ]
+  },
+  {
+   "version": "v8",
+   "goal": "spades",
+   "dealt": [
+    3,
+    1,
+    1,
+    5
+   ],
+   "final": [
+    0,
+    0,
+    5,
+    5
+   ],
+   "p_goal_at_bell": 0.76,
+   "top_bids": [
+    12,
+    10,
+    12,
+    10
+   ],
+   "pnl": -39,
+   "top_bids_by_bot": [
+    [
+     11,
+     10,
+     5,
+     4
+    ],
+    [
+     9,
+     4,
+     12,
+     10
+    ],
+    [
+     12,
+     6,
+     4,
+     4
+    ]
+   ]
+  },
+  {
+   "version": "v8",
+   "goal": "clubs",
+   "dealt": [
+    3,
+    3,
+    1,
+    3
+   ],
+   "final": [
+    6,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    10,
+    25,
+    11,
+    18
+   ],
+   "pnl": 54,
+   "top_bids_by_bot": [
+    [
+     10,
+     25,
+     4,
+     6
+    ],
+    [
+     6,
+     10,
+     11,
+     11
+    ],
+    [
+     9,
+     8,
+     6,
+     18
+    ]
+   ]
+  },
+  {
+   "version": "v9",
+   "goal": "spades",
+   "dealt": [
+    2,
+    1,
+    4,
+    3
+   ],
+   "final": [
+    6,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    22,
+    8,
+    16,
+    7
+   ],
+   "pnl": 92,
+   "top_bids_by_bot": [
+    [
+     22,
+     4,
+     16,
+     4
+    ],
+    [
+     11,
+     7,
+     4,
+     4
+    ],
+    [
+     15,
+     8,
+     4,
+     7
+    ]
+   ]
+  },
+  {
+   "version": "v9",
+   "goal": "clubs",
+   "dealt": [
+    2,
+    2,
+    4,
+    2
+   ],
+   "final": [
+    0,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    9,
+    21,
+    6,
+    10
+   ],
+   "pnl": 98,
+   "top_bids_by_bot": [
+    [
+     6,
+     21,
+     4,
+     4
+    ],
+    [
+     9,
+     9,
+     4,
+     10
+    ],
+    [
+     8,
+     10,
+     6,
+     4
+    ]
+   ]
+  },
+  {
+   "version": "v9",
+   "goal": "spades",
+   "dealt": [
+    2,
+    3,
+    4,
+    1
+   ],
+   "final": [
+    6,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    23,
+    13,
+    14,
+    10
+   ],
+   "pnl": 103,
+   "top_bids_by_bot": [
+    [
+     23,
+     11,
+     9,
+     4
+    ],
+    [
+     11,
+     13,
+     14,
+     10
+    ],
+    [
+     10,
+     12,
+     4,
+     4
+    ]
+   ]
+  },
+  {
+   "version": "v9",
+   "goal": "clubs",
+   "dealt": [
+    2,
+    3,
+    3,
+    2
+   ],
+   "final": [
+    0,
+    7,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.97,
+   "top_bids": [
+    7,
+    11,
+    18,
+    7
+   ],
+   "pnl": 104,
+   "top_bids_by_bot": [
+    [
+     7,
+     11,
+     6,
+     4
+    ],
+    [
+     5,
+     11,
+     4,
+     7
+    ],
+    [
+     6,
+     9,
+     18,
+     4
+    ]
+   ]
+  },
+  {
+   "version": "v9",
+   "goal": "hearts",
+   "dealt": [
+    3,
+    2,
+    3,
+    2
+   ],
+   "final": [
+    3,
+    0,
+    0,
+    5
+   ],
+   "p_goal_at_bell": 0.99,
+   "top_bids": [
+    16,
+    8,
+    16,
+    12
+   ],
+   "pnl": -53,
+   "top_bids_by_bot": [
+    [
+     4,
+     4,
+     12,
+     4
+    ],
+    [
+     16,
+     4,
+     10,
+     12
+    ],
+    [
+     4,
+     8,
+     16,
+     9
+    ]
+   ]
+  },
+  {
+   "version": "v9",
+   "goal": "clubs",
+   "dealt": [
+    3,
+    3,
+    1,
+    3
+   ],
+   "final": [
+    0,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    17,
+    23,
+    9,
+    17
+   ],
+   "pnl": 108,
+   "top_bids_by_bot": [
+    [
+     4,
+     23,
+     6,
+     4
+    ],
+    [
+     17,
+     9,
+     9,
+     11
+    ],
+    [
+     6,
+     8,
+     4,
+     17
+    ]
+   ]
+  },
+  {
+   "version": "v9",
+   "goal": "clubs",
+   "dealt": [
+    2,
+    3,
+    1,
+    4
+   ],
+   "final": [
+    6,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.99,
+   "top_bids": [
+    10,
+    10,
+    8,
+    7
+   ],
+   "pnl": 65,
+   "top_bids_by_bot": [
+    [
+     4,
+     9,
+     4,
+     4
+    ],
+    [
+     6,
+     10,
+     7,
+     4
+    ],
+    [
+     10,
+     9,
+     8,
+     7
+    ]
+   ]
+  },
+  {
+   "version": "v9",
+   "goal": "hearts",
+   "dealt": [
+    1,
+    4,
+    5,
+    0
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    7
+   ],
+   "p_goal_at_bell": 0.93,
+   "top_bids": [
+    12,
+    10,
+    11,
+    13
+   ],
+   "pnl": -64,
+   "top_bids_by_bot": [
+    [
+     5,
+     7,
+     11,
+     6
+    ],
+    [
+     4,
+     10,
+     9,
+     13
+    ],
+    [
+     12,
+     4,
+     11,
+     7
+    ]
+   ]
+  },
+  {
+   "version": "v9",
+   "goal": "hearts",
+   "dealt": [
+    1,
+    3,
+    4,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    6,
+    6
+   ],
+   "p_goal_at_bell": 0.96,
+   "top_bids": [
+    5,
+    12,
+    11,
+    5
+   ],
+   "pnl": 71,
+   "top_bids_by_bot": [
+    [
+     4,
+     7,
+     8,
+     4
+    ],
+    [
+     4,
+     4,
+     11,
+     5
+    ],
+    [
+     5,
+     12,
+     8,
+     4
+    ]
+   ]
+  },
+  {
+   "version": "v9",
+   "goal": "clubs",
+   "dealt": [
+    4,
+    1,
+    4,
+    1
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1.0,
+   "top_bids": [
+    9,
+    18,
+    11,
+    10
+   ],
+   "pnl": 11,
+   "top_bids_by_bot": [
+    [
+     8,
+     18,
+     11,
+     7
+    ],
+    [
+     3,
+     15,
+     4,
+     4
+    ],
+    [
+     9,
+     10,
+     9,
+     10
+    ]
+   ]
+  },
+  {
+   "version": "v9.1",
+   "goal": "spades",
+   "dealt": [
+    1,
+    4,
+    2,
+    3
+   ],
+   "final": [
+    6,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.991,
+   "top_bids": [
+    11,
+    14,
+    6,
+    5
+   ],
+   "top_bids_by_bot": [
+    [
+     11,
+     8,
+     4,
+     4
+    ],
+    [
+     9,
+     14,
+     6,
+     4
+    ],
+    [
+     10,
+     4,
+     4,
+     5
+    ]
+   ],
+   "pnl": 97
+  },
+  {
+   "version": "v9.1",
+   "goal": "spades",
+   "dealt": [
+    2,
+    5,
+    1,
+    2
+   ],
+   "final": [
+    6,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.912,
+   "top_bids": [
+    11,
+    18,
+    12,
+    17
+   ],
+   "top_bids_by_bot": [
+    [
+     7,
+     4,
+     7,
+     4
+    ],
+    [
+     11,
+     12,
+     12,
+     17
+    ],
+    [
+     9,
+     18,
+     4,
+     8
+    ]
+   ],
+   "pnl": 121
+  },
+  {
+   "version": "v9.1",
+   "goal": "clubs",
+   "dealt": [
+    5,
+    1,
+    1,
+    3
+   ],
+   "final": [
+    0,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.998,
+   "top_bids": [
+    11,
+    12,
+    12,
+    15
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     9,
+     8,
+     15
+    ],
+    [
+     4,
+     12,
+     12,
+     4
+    ],
+    [
+     11,
+     11,
+     4,
+     11
+    ]
+   ],
+   "pnl": 104
+  },
+  {
+   "version": "v9.1",
+   "goal": "diamonds",
+   "dealt": [
+    2,
+    1,
+    5,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    6
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    9,
+    6,
+    10,
+    17
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     4,
+     10,
+     17
+    ],
+    [
+     9,
+     6,
+     4,
+     10
+    ],
+    [
+     4,
+     4,
+     5,
+     10
+    ]
+   ],
+   "pnl": 105
+  },
+  {
+   "version": "v9.1",
+   "goal": "hearts",
+   "dealt": [
+    5,
+    2,
+    2,
+    1
+   ],
+   "final": [
+    6,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.828,
+   "top_bids": [
+    15,
+    7,
+    14,
+    10
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     7,
+     14,
+     3
+    ],
+    [
+     4,
+     4,
+     9,
+     6
+    ],
+    [
+     15,
+     4,
+     14,
+     10
+    ]
+   ],
+   "pnl": -35
+  },
+  {
+   "version": "v9.1",
+   "goal": "spades",
+   "dealt": [
+    4,
+    2,
+    1,
+    3
+   ],
+   "final": [
+    6,
+    3,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.999,
+   "top_bids": [
+    14,
+    10,
+    10,
+    10
+   ],
+   "top_bids_by_bot": [
+    [
+     14,
+     4,
+     6,
+     4
+    ],
+    [
+     10,
+     10,
+     4,
+     4
+    ],
+    [
+     10,
+     5,
+     10,
+     10
+    ]
+   ],
+   "pnl": 78
+  },
+  {
+   "version": "v9.1",
+   "goal": "hearts",
+   "dealt": [
+    4,
+    2,
+    2,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    6,
+    4
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    11,
+    13,
+    21,
+    11
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     13,
+     9,
+     11
+    ],
+    [
+     11,
+     4,
+     8,
+     6
+    ],
+    [
+     3,
+     8,
+     21,
+     6
+    ]
+   ],
+   "pnl": 73
+  },
+  {
+   "version": "v9.1",
+   "goal": "clubs",
+   "dealt": [
+    3,
+    2,
+    2,
+    3
+   ],
+   "final": [
+    4,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.992,
+   "top_bids": [
+    13,
+    16,
+    7,
+    11
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     13,
+     7,
+     4
+    ],
+    [
+     2,
+     6,
+     4,
+     4
+    ],
+    [
+     13,
+     16,
+     4,
+     11
+    ]
+   ],
+   "pnl": -18
+  },
+  {
+   "version": "v9.1",
+   "goal": "clubs",
+   "dealt": [
+    4,
+    1,
+    3,
+    2
+   ],
+   "final": [
+    0,
+    6,
+    0,
+    5
+   ],
+   "p_goal_at_bell": 0.818,
+   "top_bids": [
+    6,
+    10,
+    8,
+    7
+   ],
+   "top_bids_by_bot": [
+    [
+     6,
+     10,
+     4,
+     7
+    ],
+    [
+     1,
+     null,
+     8,
+     2
+    ],
+    [
+     6,
+     10,
+     4,
+     4
+    ]
+   ],
+   "pnl": 84
+  },
+  {
+   "version": "v9.1",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    4,
+    1,
+    3
+   ],
+   "final": [
+    5,
+    4,
+    0,
+    2
+   ],
+   "p_goal_at_bell": 0.314,
+   "top_bids": [
+    15,
+    8,
+    13,
+    7
+   ],
+   "top_bids_by_bot": [
+    [
+     15,
+     4,
+     13,
+     4
+    ],
+    [
+     null,
+     null,
+     null,
+     null
+    ],
+    [
+     4,
+     8,
+     11,
+     7
+    ]
+   ],
+   "pnl": -58
+  },
+  {
+   "version": "v10",
+   "goal": "clubs",
+   "dealt": [
+    3,
+    4,
+    1,
+    2
+   ],
+   "final": [
+    7,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.612,
+   "top_bids": [
+    11,
+    8,
+    10,
+    15
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     8,
+     9,
+     4
+    ],
+    [
+     11,
+     8,
+     4,
+     15
+    ],
+    [
+     8,
+     8,
+     10,
+     6
+    ]
+   ],
+   "pnl": 83
+  },
+  {
+   "version": "v10",
+   "goal": "spades",
+   "dealt": [
+    3,
+    5,
+    1,
+    1
+   ],
+   "final": [
+    6,
+    4,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.978,
+   "top_bids": [
+    10,
+    10,
+    12,
+    15
+   ],
+   "top_bids_by_bot": [
+    [
+     10,
+     10,
+     4,
+     15
+    ],
+    [
+     9,
+     4,
+     7,
+     4
+    ],
+    [
+     10,
+     4,
+     12,
+     5
+    ]
+   ],
+   "pnl": 128
+  },
+  {
+   "version": "v10",
+   "goal": "hearts",
+   "dealt": [
+    1,
+    3,
+    4,
+    2
+   ],
+   "final": [
+    0,
+    3,
+    4,
+    0
+   ],
+   "p_goal_at_bell": 0.789,
+   "top_bids": [
+    10,
+    12,
+    10,
+    7
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     12,
+     10,
+     4
+    ],
+    [
+     8,
+     4,
+     9,
+     7
+    ],
+    [
+     10,
+     4,
+     9,
+     6
+    ]
+   ],
+   "pnl": 10
+  },
+  {
+   "version": "v10",
+   "goal": "clubs",
+   "dealt": [
+    5,
+    2,
+    1,
+    2
+   ],
+   "final": [
+    0,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    13,
+    23,
+    11,
+    11
+   ],
+   "top_bids_by_bot": [
+    [
+     13,
+     10,
+     11,
+     11
+    ],
+    [
+     4,
+     23,
+     4,
+     4
+    ],
+    [
+     5,
+     10,
+     11,
+     4
+    ]
+   ],
+   "pnl": 110
+  },
+  {
+   "version": "v10",
+   "goal": "spades",
+   "dealt": [
+    1,
+    3,
+    1,
+    5
+   ],
+   "final": [
+    0,
+    0,
+    1,
+    1
+   ],
+   "p_goal_at_bell": 0.998,
+   "top_bids": [
+    17,
+    9,
+    10,
+    7
+   ],
+   "top_bids_by_bot": [
+    [
+     17,
+     3,
+     4,
+     4
+    ],
+    [
+     12,
+     9,
+     4,
+     4
+    ],
+    [
+     7,
+     8,
+     10,
+     7
+    ]
+   ],
+   "pnl": -4
+  },
+  {
+   "version": "v10",
+   "goal": "clubs",
+   "dealt": [
+    4,
+    2,
+    1,
+    3
+   ],
+   "final": [
+    4,
+    6,
+    1,
+    0
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    7,
+    25,
+    6,
+    14
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     25,
+     4,
+     14
+    ],
+    [
+     7,
+     9,
+     4,
+     6
+    ],
+    [
+     7,
+     10,
+     6,
+     4
+    ]
+   ],
+   "pnl": 119
+  },
+  {
+   "version": "v10",
+   "goal": "clubs",
+   "dealt": [
+    2,
+    3,
+    4,
+    1
+   ],
+   "final": [
+    0,
+    1,
+    6,
+    5
+   ],
+   "p_goal_at_bell": 0.913,
+   "top_bids": [
+    18,
+    13,
+    17,
+    12
+   ],
+   "top_bids_by_bot": [
+    [
+     18,
+     13,
+     4,
+     12
+    ],
+    [
+     4,
+     10,
+     4,
+     4
+    ],
+    [
+     4,
+     11,
+     17,
+     4
+    ]
+   ],
+   "pnl": -33
+  },
+  {
+   "version": "v10",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    2,
+    2,
+    4
+   ],
+   "final": [
+    0,
+    3,
+    5,
+    5
+   ],
+   "p_goal_at_bell": 0.538,
+   "top_bids": [
+    13,
+    11,
+    8,
+    10
+   ],
+   "top_bids_by_bot": [
+    [
+     13,
+     4,
+     5,
+     10
+    ],
+    [
+     9,
+     11,
+     5,
+     5
+    ],
+    [
+     4,
+     4,
+     8,
+     3
+    ]
+   ],
+   "pnl": 43
+  },
+  {
+   "version": "v10",
+   "goal": "spades",
+   "dealt": [
+    3,
+    1,
+    4,
+    2
+   ],
+   "final": [
+    5,
+    0,
+    0,
+    5
+   ],
+   "p_goal_at_bell": 0.698,
+   "top_bids": [
+    13,
+    12,
+    12,
+    16
+   ],
+   "top_bids_by_bot": [
+    [
+     8,
+     4,
+     12,
+     5
+    ],
+    [
+     13,
+     8,
+     4,
+     4
+    ],
+    [
+     9,
+     12,
+     4,
+     16
+    ]
+   ],
+   "pnl": 58
+  },
+  {
+   "version": "v10",
+   "goal": "clubs",
+   "dealt": [
+    4,
+    2,
+    2,
+    2
+   ],
+   "final": [
+    2,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    7,
+    20,
+    7,
+    16
+   ],
+   "top_bids_by_bot": [
+    [
+     3,
+     20,
+     7,
+     16
+    ],
+    [
+     7,
+     11,
+     4,
+     8
+    ],
+    [
+     6,
+     9,
+     4,
+     4
+    ]
+   ],
+   "pnl": 89
+  },
+  {
+   "version": "v11",
+   "goal": "diamonds",
+   "dealt": [
+    1,
+    3,
+    2,
+    4
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    6
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    12,
+    8,
+    14,
+    21
+   ],
+   "top_bids_by_bot": [
+    [
+     12,
+     4,
+     14,
+     9
+    ],
+    [
+     12,
+     8,
+     4,
+     11
+    ],
+    [
+     4,
+     4,
+     4,
+     21
+    ]
+   ],
+   "pnl": 132
+  },
+  {
+   "version": "v11",
+   "goal": "diamonds",
+   "dealt": [
+    1,
+    5,
+    3,
+    1
+   ],
+   "final": [
+    5,
+    0,
+    0,
+    1
+   ],
+   "p_goal_at_bell": 0.953,
+   "top_bids": [
+    11,
+    11,
+    13,
+    15
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     3,
+     4,
+     15
+    ],
+    [
+     4,
+     4,
+     13,
+     9
+    ],
+    [
+     11,
+     11,
+     11,
+     9
+    ]
+   ],
+   "pnl": -5
+  },
+  {
+   "version": "v11",
+   "goal": "hearts",
+   "dealt": [
+    1,
+    4,
+    2,
+    3
+   ],
+   "final": [
+    4,
+    4,
+    1,
+    0
+   ],
+   "p_goal_at_bell": 0.983,
+   "top_bids": [
+    7,
+    11,
+    11,
+    16
+   ],
+   "top_bids_by_bot": [
+    [
+     7,
+     11,
+     9,
+     5
+    ],
+    [
+     4,
+     5,
+     11,
+     6
+    ],
+    [
+     4,
+     4,
+     10,
+     16
+    ]
+   ],
+   "pnl": -28
+  },
+  {
+   "version": "v11",
+   "goal": "diamonds",
+   "dealt": [
+    1,
+    2,
+    5,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    8
+   ],
+   "p_goal_at_bell": 0.992,
+   "top_bids": [
+    10,
+    9,
+    5,
+    9
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     4,
+     5,
+     9
+    ],
+    [
+     10,
+     9,
+     4,
+     9
+    ],
+    [
+     10,
+     8,
+     4,
+     8
+    ]
+   ],
+   "pnl": 113
+  },
+  {
+   "version": "v11",
+   "goal": "spades",
+   "dealt": [
+    3,
+    3,
+    2,
+    2
+   ],
+   "final": [
+    6,
+    7,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.954,
+   "top_bids": [
+    14,
+    11,
+    5,
+    6
+   ],
+   "top_bids_by_bot": [
+    [
+     10,
+     4,
+     4,
+     5
+    ],
+    [
+     14,
+     4,
+     5,
+     4
+    ],
+    [
+     9,
+     11,
+     4,
+     6
+    ]
+   ],
+   "pnl": 94
+  },
+  {
+   "version": "v11",
+   "goal": "spades",
+   "dealt": [
+    3,
+    5,
+    2,
+    0
+   ],
+   "final": [
+    8,
+    2,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    11,
+    9,
+    14,
+    15
+   ],
+   "top_bids_by_bot": [
+    [
+     9,
+     4,
+     14,
+     15
+    ],
+    [
+     9,
+     9,
+     11,
+     7
+    ],
+    [
+     11,
+     4,
+     4,
+     7
+    ]
+   ],
+   "pnl": 154
+  },
+  {
+   "version": "v11",
+   "goal": "diamonds",
+   "dealt": [
+    4,
+    2,
+    3,
+    1
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.999,
+   "top_bids": [
+    12,
+    11,
+    18,
+    16
+   ],
+   "top_bids_by_bot": [
+    [
+     11,
+     11,
+     8,
+     11
+    ],
+    [
+     12,
+     4,
+     4,
+     16
+    ],
+    [
+     4,
+     4,
+     18,
+     14
+    ]
+   ],
+   "pnl": 23
+  },
+  {
+   "version": "v11",
+   "goal": "hearts",
+   "dealt": [
+    4,
+    0,
+    4,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    6,
+    0
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    12,
+    10,
+    23,
+    10
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     10,
+     23,
+     4
+    ],
+    [
+     12,
+     4,
+     10,
+     10
+    ],
+    [
+     9,
+     6,
+     10,
+     10
+    ]
+   ],
+   "pnl": 112
+  },
+  {
+   "version": "v11",
+   "goal": "spades",
+   "dealt": [
+    2,
+    5,
+    1,
+    2
+   ],
+   "final": [
+    7,
+    3,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.947,
+   "top_bids": [
+    9,
+    11,
+    12,
+    12
+   ],
+   "top_bids_by_bot": [
+    [
+     9,
+     11,
+     6,
+     4
+    ],
+    [
+     9,
+     3,
+     12,
+     12
+    ],
+    [
+     9,
+     4,
+     10,
+     9
+    ]
+   ],
+   "pnl": 148
+  },
+  {
+   "version": "v11",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    3,
+    2,
+    3
+   ],
+   "final": [
+    0,
+    5,
+    1,
+    0
+   ],
+   "p_goal_at_bell": 0.916,
+   "top_bids": [
+    15,
+    12,
+    10,
+    16
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     4,
+     9,
+     7
+    ],
+    [
+     15,
+     12,
+     9,
+     3
+    ],
+    [
+     7,
+     4,
+     10,
+     16
+    ]
+   ],
+   "pnl": -8
+  },
+  {
+   "version": "v12",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    2,
+    2,
+    4
+   ],
+   "final": [
+    0,
+    0,
+    7,
+    5
+   ],
+   "p_goal_at_bell": 0.938,
+   "top_bids": [
+    17,
+    7,
+    10,
+    10
+   ],
+   "top_bids_by_bot": [
+    [
+     6,
+     4,
+     7,
+     10
+    ],
+    [
+     4,
+     4,
+     8,
+     4
+    ],
+    [
+     17,
+     7,
+     10,
+     4
+    ]
+   ],
+   "pnl": 86
+  },
+  {
+   "version": "v12",
+   "goal": "diamonds",
+   "dealt": [
+    2,
+    1,
+    5,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    6
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    14,
+    8,
+    10,
+    19
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     4,
+     10,
+     19
+    ],
+    [
+     14,
+     6,
+     6,
+     11
+    ],
+    [
+     7,
+     8,
+     4,
+     9
+    ]
+   ],
+   "pnl": 134
+  },
+  {
+   "version": "v12",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    2,
+    2,
+    4
+   ],
+   "final": [
+    0,
+    0,
+    6,
+    0
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    12,
+    8,
+    25,
+    12
+   ],
+   "top_bids_by_bot": [
+    [
+     12,
+     4,
+     25,
+     12
+    ],
+    [
+     4,
+     6,
+     14,
+     6
+    ],
+    [
+     10,
+     8,
+     8,
+     4
+    ]
+   ],
+   "pnl": 126
+  },
+  {
+   "version": "v12",
+   "goal": "spades",
+   "dealt": [
+    4,
+    2,
+    2,
+    2
+   ],
+   "final": [
+    6,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.997,
+   "top_bids": [
+    13,
+    7,
+    10,
+    7
+   ],
+   "top_bids_by_bot": [
+    [
+     13,
+     4,
+     8,
+     4
+    ],
+    [
+     8,
+     6,
+     4,
+     6
+    ],
+    [
+     8,
+     7,
+     10,
+     7
+    ]
+   ],
+   "pnl": 69
+  },
+  {
+   "version": "v12",
+   "goal": "diamonds",
+   "dealt": [
+    2,
+    6,
+    1,
+    1
+   ],
+   "final": [
+    3,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.998,
+   "top_bids": [
+    4,
+    11,
+    5,
+    15
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     4,
+     5,
+     10
+    ],
+    [
+     4,
+     4,
+     5,
+     15
+    ],
+    [
+     4,
+     11,
+     4,
+     13
+    ]
+   ],
+   "pnl": -3
+  },
+  {
+   "version": "v12",
+   "goal": "clubs",
+   "dealt": [
+    1,
+    2,
+    5,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.995,
+   "top_bids": [
+    11,
+    16,
+    5,
+    9
+   ],
+   "top_bids_by_bot": [
+    [
+     11,
+     16,
+     3,
+     4
+    ],
+    [
+     8,
+     13,
+     4,
+     8
+    ],
+    [
+     6,
+     10,
+     5,
+     9
+    ]
+   ],
+   "pnl": 9
+  },
+  {
+   "version": "v12",
+   "goal": "diamonds",
+   "dealt": [
+    3,
+    2,
+    4,
+    1
+   ],
+   "final": [
+    0,
+    0,
+    1,
+    0
+   ],
+   "p_goal_at_bell": 0.999,
+   "top_bids": [
+    18,
+    7,
+    6,
+    16
+   ],
+   "top_bids_by_bot": [
+    [
+     9,
+     4,
+     4,
+     14
+    ],
+    [
+     4,
+     4,
+     5,
+     16
+    ],
+    [
+     18,
+     7,
+     6,
+     11
+    ]
+   ],
+   "pnl": 43
+  },
+  {
+   "version": "v12",
+   "goal": "spades",
+   "dealt": [
+    1,
+    2,
+    2,
+    5
+   ],
+   "final": [
+    5,
+    0,
+    1,
+    0
+   ],
+   "p_goal_at_bell": 0.987,
+   "top_bids": [
+    12,
+    17,
+    15,
+    8
+   ],
+   "top_bids_by_bot": [
+    [
+     12,
+     17,
+     4,
+     4
+    ],
+    [
+     11,
+     4,
+     15,
+     4
+    ],
+    [
+     9,
+     10,
+     6,
+     8
+    ]
+   ],
+   "pnl": 52
+  },
+  {
+   "version": "v12",
+   "goal": "spades",
+   "dealt": [
+    3,
+    4,
+    2,
+    1
+   ],
+   "final": [
+    6,
+    4,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.999,
+   "top_bids": [
+    18,
+    6,
+    17,
+    11
+   ],
+   "top_bids_by_bot": [
+    [
+     18,
+     4,
+     4,
+     11
+    ],
+    [
+     9,
+     6,
+     17,
+     4
+    ],
+    [
+     11,
+     4,
+     9,
+     4
+    ]
+   ],
+   "pnl": 144
+  },
+  {
+   "version": "v12",
+   "goal": "diamonds",
+   "dealt": [
+    2,
+    2,
+    5,
+    1
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    6
+   ],
+   "p_goal_at_bell": 0.969,
+   "top_bids": [
+    12,
+    8,
+    18,
+    10
+   ],
+   "top_bids_by_bot": [
+    [
+     12,
+     4,
+     4,
+     10
+    ],
+    [
+     4,
+     7,
+     7,
+     10
+    ],
+    [
+     10,
+     8,
+     18,
+     8
+    ]
+   ],
+   "pnl": 139
+  },
+  {
+   "version": "v13",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    2,
+    3,
+    3
+   ],
+   "final": [
+    0,
+    0,
+    7,
+    4
+   ],
+   "p_goal_at_bell": 0.978,
+   "top_bids": [
+    13,
+    8,
+    9,
+    6
+   ],
+   "top_bids_by_bot": [
+    [
+     13,
+     6,
+     8,
+     4
+    ],
+    [
+     6,
+     4,
+     9,
+     6
+    ],
+    [
+     4,
+     8,
+     8,
+     6
+    ]
+   ],
+   "pnl": 144
+  },
+  {
+   "version": "v13",
+   "goal": "hearts",
+   "dealt": [
+    0,
+    1,
+    3,
+    6
+   ],
+   "final": [
+    0,
+    0,
+    6,
+    0
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    11,
+    14,
+    21,
+    10
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     14,
+     21,
+     10
+    ],
+    [
+     11,
+     4,
+     11,
+     4
+    ],
+    [
+     4,
+     10,
+     10,
+     6
+    ]
+   ],
+   "pnl": 141
+  },
+  {
+   "version": "v13",
+   "goal": "clubs",
+   "dealt": [
+    3,
+    2,
+    3,
+    2
+   ],
+   "final": [
+    0,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    4,
+    23,
+    10,
+    8
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     10,
+     10,
+     8
+    ],
+    [
+     4,
+     23,
+     4,
+     4
+    ],
+    [
+     4,
+     9,
+     4,
+     4
+    ]
+   ],
+   "pnl": 110
+  },
+  {
+   "version": "v13",
+   "goal": "diamonds",
+   "dealt": [
+    2,
+    1,
+    5,
+    2
+   ],
+   "final": [
+    0,
+    0,
+    0,
+    6
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    6,
+    11,
+    18,
+    22
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     11,
+     8,
+     10
+    ],
+    [
+     6,
+     6,
+     7,
+     22
+    ],
+    [
+     6,
+     10,
+     18,
+     11
+    ]
+   ],
+   "pnl": 152
+  },
+  {
+   "version": "v13",
+   "goal": "clubs",
+   "dealt": [
+    3,
+    3,
+    2,
+    2
+   ],
+   "final": [
+    2,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    12,
+    23,
+    8,
+    16
+   ],
+   "top_bids_by_bot": [
+    [
+     12,
+     8,
+     8,
+     9
+    ],
+    [
+     4,
+     23,
+     4,
+     16
+    ],
+    [
+     5,
+     10,
+     4,
+     6
+    ]
+   ],
+   "pnl": 94
+  },
+  {
+   "version": "v13",
+   "goal": "clubs",
+   "dealt": [
+    2,
+    4,
+    2,
+    2
+   ],
+   "final": [
+    3,
+    6,
+    0,
+    0
+   ],
+   "p_goal_at_bell": 0.984,
+   "top_bids": [
+    6,
+    11,
+    7,
+    7
+   ],
+   "top_bids_by_bot": [
+    [
+     4,
+     7,
+     4,
+     7
+    ],
+    [
+     4,
+     10,
+     7,
+     4
+    ],
+    [
+     6,
+     11,
+     4,
+     4
+    ]
+   ],
+   "pnl": 135
+  },
+  {
+   "version": "v13",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    3,
+    2,
+    3
+   ],
+   "final": [
+    0,
+    0,
+    1,
+    0
+   ],
+   "p_goal_at_bell": 0.966,
+   "top_bids": [
+    7,
+    5,
+    14,
+    13
+   ],
+   "top_bids_by_bot": [
+    [
+     null,
+     null,
+     null,
+     null
+    ],
+    [
+     4,
+     4,
+     11,
+     13
+    ],
+    [
+     7,
+     5,
+     14,
+     4
+    ]
+   ],
+   "pnl": 34
+  },
+  {
+   "version": "v13",
+   "goal": "spades",
+   "dealt": [
+    2,
+    4,
+    1,
+    3
+   ],
+   "final": [
+    6,
+    0,
+    0,
+    2
+   ],
+   "p_goal_at_bell": 0.998,
+   "top_bids": [
+    19,
+    5,
+    9,
+    11
+   ],
+   "top_bids_by_bot": [
+    [
+     null,
+     null,
+     null,
+     null
+    ],
+    [
+     19,
+     3,
+     4,
+     4
+    ],
+    [
+     11,
+     5,
+     9,
+     11
+    ]
+   ],
+   "pnl": 110
+  },
+  {
+   "version": "v13",
+   "goal": "hearts",
+   "dealt": [
+    2,
+    3,
+    3,
+    2
+   ],
+   "final": [
+    7,
+    0,
+    6,
+    3
+   ],
+   "p_goal_at_bell": 1,
+   "top_bids": [
+    4,
+    10,
+    23,
+    7
+   ],
+   "top_bids_by_bot": [
+    [
+     null,
+     null,
+     null,
+     null
+    ],
+    [
+     4,
+     10,
+     23,
+     7
+    ],
+    [
+     4,
+     4,
+     9,
+     5
+    ]
+   ],
+   "pnl": 72
+  },
+  {
+   "version": "v13",
+   "goal": "spades",
+   "dealt": [
+    2,
+    1,
+    2,
+    5
+   ],
+   "final": [
+    3,
+    0,
+    10,
+    6
+   ],
+   "p_goal_at_bell": 0.051,
+   "top_bids": [
+    8,
+    4,
+    6,
+    13
+   ],
+   "top_bids_by_bot": [
+    [
+     null,
+     null,
+     null,
+     null
+    ],
+    [
+     8,
+     4,
+     6,
+     13
+    ],
+    [
+     null,
+     null,
+     null,
+     null
+    ]
+   ],
+   "pnl": -3
+  }
+ ]
+}

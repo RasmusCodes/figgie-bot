@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Figgie Shark - JS vs Python</title>
+<style>
+  body { font: 13px/1.5 ui-monospace, Consolas, monospace; margin: 24px; background: #fff; color: #111; }
+  .ok { color: #0a7d32; } .bad { color: #b00020; }
+</style>
+</head>
+<body>
+<h1>JS port vs Python reference</h1>
+<pre id="out">running&hellip;</pre>
+<script src="../web/figgie-shark.user.js"></script>
+<script>
+(async function () {
+  const C = window.FiggieSharkCore;
+  const data = await (await fetch('js_vectors.json', { cache: 'no-store' })).json();
+  const cases = data.cases;
+  const params = data.params || {};
+  const ref = new C.SharkBot(params); // same parameters as make_js_vectors.py
+  const model = ref.reading;
+  const smart = ref.smart;
+  const flat = (x) => (Array.isArray(x) ? x.flatMap(flat) : [x]);
+  const absDiff = (a, b) => Math.max(0, ...flat(a).map((v, i) => Math.abs(v - flat(b)[i])));
+  const relDiff = (a, b) => Math.max(0, ...flat(a).map((v, i) => Math.abs(v - flat(b)[i]) / Math.max(Math.abs(v), Math.abs(flat(b)[i]), 1e-300)));
+  const worst = { post_plain: 0, quote_lik_rel: 0, smart_lik_rel: 0, post: 0, values: 0, learner: 0 };
+  const opFails = [];
+  let nLearner = 0;
+
+  function recordingMarket(me, tick, book, hand, cash) {
+    const bids = book.map((b) => (b[0] ? { price: b[0][0], player: b[0][1] } : null));
+    const offers = book.map((b) => (b[1] ? { price: b[1][0], player: b[1][1] } : null));
+    const ops = [];
+    const clear = () => { for (let s = 0; s < 4; s++) { bids[s] = null; offers[s] = null; } };
+    return {
+      me, tick, hand: hand.slice(), cash, ops,
+      bestBid: (s) => bids[s],
+      bestOffer: (s) => offers[s],
+      bid(s, price) {
+        ops.push(['bid', s, price]);
+        const off = offers[s];
+        if (off && price >= off.price) { if (off.player === me) return false; clear(); return true; }
+        const cur = bids[s];
+        if (cur && price <= cur.price) return false;
+        bids[s] = { price, player: me }; return true;
+      },
+      offer(s, price) {
+        ops.push(['offer', s, price]);
+        const bid = bids[s];
+        if (bid && price <= bid.price) { if (bid.player === me) return false; clear(); return true; }
+        const cur = offers[s];
+        if (cur && price >= cur.price) return false;
+        offers[s] = { price, player: me }; return true;
+      },
+      buy(s, maxPrice) {
+        ops.push(['buy', s, maxPrice === undefined ? null : maxPrice]);
+        const off = offers[s];
+        if (!off || off.player === me || (maxPrice != null && off.price > maxPrice)) return false;
+        clear(); return true;
+      },
+      sell(s, minPrice) {
+        ops.push(['sell', s, minPrice === undefined ? null : minPrice]);
+        const bid = bids[s];
+        if (!bid || bid.player === me || (minPrice != null && bid.price < minPrice)) return false;
+        clear(); return true;
+      },
+      cancelBid(s) { ops.push(['cancel_bid', s]); if (bids[s] && bids[s].player === me) { bids[s] = null; return true; } return false; },
+      cancelOffer(s) { ops.push(['cancel_offer', s]); if (offers[s] && offers[s].player === me) { offers[s] = null; return true; } return false; },
+    };
+  }
+
+  for (const [ci, c] of cases.entries()) {
+    const e = c.expected;
+    const n = c.n_players, H = c.hand_size, me = c.me;
+    const kitty = Math.max(0, 40 - H * n), pot = Math.floor(200 / n) * n; // three players: one card undealt, $198
+    const others = []; for (let p = 0; p < n; p++) if (p !== me) others.push(p);
+    const mins = others.map((p) => c.mins[p]);
+    const nets = others.map((p) => c.net[p]);
+    const quoteMaps = others.map((p) => new Map(c.quotes[String(p)].map(([s, ib, px]) => [s + '|' + (ib ? 1 : 0), { s, isBid: ib, price: px }])));
+    const handNow = c.hand0.map((h, s) => h + c.net[me][s]);
+
+    worst.post_plain = Math.max(worst.post_plain, absDiff(C.posterior(c.hand0, mins, H, n - 1, null, kitty), e.post_plain));
+    const qlik = C.quoteLikelihood(c.hand0, mins, quoteMaps, H, model);
+    worst.quote_lik_rel = Math.max(worst.quote_lik_rel, relDiff(qlik, e.quote_lik));
+    const slik = smart.player_cap > 0
+      ? C.smartMoneyVotesLikelihood(others.map((p) => c.top_by[String(p)]), others.map((p) => c.low_by[String(p)]), smart)
+      : C.smartMoneyLikelihood(c.top_bid, c.low_offer, smart, others.map((p) => c.top_by[String(p)]));
+    worst.smart_lik_rel = Math.max(worst.smart_lik_rel, relDiff(slik, e.smart_lik));
+    const post = C.posterior(c.hand0, mins, H, n - 1, qlik.map((a, i) => a * slik[i]), kitty);
+    worst.post = Math.max(worst.post, absDiff(post, e.post));
+    for (const [akey, alpha] of [['3.0', 3.0], ['12.34', 12.34], ['None', null]]) {
+      const v = C.valueCards(post, c.hand0, handNow, mins, nets, H, alpha, ref.p.consolidate, ref.p.consolidate_at, kitty, pot);
+      const x = e.values[akey];
+      worst.values = Math.max(worst.values, absDiff([v.pGoal, v.buy, v.sell, v.buyFrom, v.sellTo, v.expected], [x.p_goal, x.buy, x.sell, x.buy_from, x.sell_to, x.expected]));
+    }
+
+    const bot = new C.SharkBot(params);
+    bot.onStart({ player: me, hand: c.hand0, nPlayers: n, handSize: H, ticks: 240 });
+    bot.beliefs.net = c.net.map((r) => r.slice());
+    bot.beliefs.mins = c.mins.map((r) => r.slice());
+    others.forEach((p, i) => bot.beliefs.quotes.set(p, quoteMaps[i]));
+    bot.beliefs.topBid = c.top_bid.slice();
+    bot.beliefs.lowOffer = c.low_offer.slice();
+    bot.beliefs.topBy = new Map(others.map((p) => [p, c.top_by[String(p)].slice()]));
+    bot.beliefs.lowBy = new Map(others.map((p) => [p, c.low_by[String(p)].slice()]));
+    bot.cost = c.cost.slice();
+    bot.bought = c.bought.slice();
+    bot.pSticky = c.p_sticky ? c.p_sticky.slice() : null;
+    bot.pAvg = c.p_avg ? c.p_avg.slice() : null;
+    bot.pTick = c.p_tick;
+    bot.pending = new Map((c.pending || []).map(([s, ev, seen, last]) => [s, [{ tick: ev[0], suit: ev[1], isBid: ev[2], price: ev[3], player: ev[4] }, seen, last]]));
+    if (c.resale && bot.resale) {
+      const r = bot.resale, x = c.resale;
+      r.open = x.open.map((e) => e.slice());
+      r.hits = x.hits; r.misses = x.misses; r.prices = x.prices.slice();
+      r.inventory = x.inventory.map((items) => items.map((it) => it.slice()));
+      r.ownHits = x.own_hits; r.ownMisses = x.own_misses; r.realized = x.realized;
+    }
+    if (c.resale_bids) bot.resaleBids = c.resale_bids.slice();
+    if (c.learner && bot.learner) {
+      bot.learner.load(c.learner);
+      bot.resale = bot.learner;
+    }
+    bot.beliefs.minsState += 1;
+    bot.beliefs.state += 1;
+    const m = recordingMarket(me, c.tick, c.book, c.hand, c.cash);
+    bot.act(m);
+    if (JSON.stringify(m.ops) !== JSON.stringify(e.ops)) opFails.push({ case: ci, seed: c.seed, tick: c.tick, js: m.ops, py: e.ops });
+    if (e.learner_after && bot.learner) {
+      // the learned-resale model after the turn (expiring opportunities update it)
+      const st = bot.learner.state();
+      const a = e.learner_after;
+      if (st.mu.length !== a.mu.length) worst.learner = Infinity;
+      else worst.learner = Math.max(worst.learner, absDiff([st.mu, st.S, st.cal, st.counts], [a.mu, a.S, a.cal, a.counts]));
+      nLearner += 1;
+    }
+  }
+
+  // the learned-resale model at a round start (same table, new table, carried from another page)
+  worst.learner_rounds = 0;
+  const learnerRounds = data.learner_rounds || [];
+  const freshLearner = () => new C.ResaleLearner({ maxPrice: ref.p.resale_learn_max, margin: ref.p.resale_margin, window: ref.p.resale_window, minLeft: ref.p.resale_min_left, stopLoss: ref.p.resale_stop, robust: ref.p.resale_robust });
+  const sameModel = (st, a) => {
+    if (st.mu.length !== a.mu.length || st.n_obs !== a.n_obs) return Infinity;
+    for (const k of ['sellers', 'table', 'prices']) if (JSON.stringify(st[k]) !== JSON.stringify(a[k])) return Infinity;
+    return absDiff([st.mu, st.S, st.cal, st.counts], [a.mu, a.S, a.cal, a.counts]);
+  };
+  for (const lr of learnerRounds) {
+    for (const [key, table] of [['same', lr.same], ['other', lr.other]]) {
+      const L = freshLearner();
+      L.load(lr.state);
+      L.startRound(lr.me, 240, table);
+      worst.learner_rounds = Math.max(worst.learner_rounds, sameModel(L.state(), lr.expected[key]));
+    }
+    const A = freshLearner();
+    A.load(lr.state);
+    const B = freshLearner();
+    B.startRound(lr.me, 240, lr.other);
+    B.seed(...A.memory());
+    worst.learner_rounds = Math.max(worst.learner_rounds, sameModel(B.state(), lr.expected.seeded));
+  }
+
+  // the bid-reading learner (read_learn): its log-odds after every round of random histories
+  worst.reading = 0;
+  const readingCases = data.reading || [];
+  for (const rc of readingCases) {
+    const R = new C.ReadingLearner();
+    rc.steps.forEach(([table, goal, early, cons], i) => {
+      R.startRound(table);
+      R.endRound(goal, early, cons);
+      const st = R.state(), a = rc.after[i];
+      if (JSON.stringify(st.table) !== JSON.stringify(a.table) || st.rounds !== a.rounds || JSON.stringify(st.seen) !== JSON.stringify(a.seen)) worst.reading = Infinity;
+      else worst.reading = Math.max(worst.reading, absDiff(st.logit, a.logit));
+    });
+  }
+
+  const nOps = cases.reduce((a, c) => a + c.expected.ops.length, 0);
+  const pass = worst.post_plain < 1e-9 && worst.post < 1e-9 && worst.quote_lik_rel < 1e-9 && worst.smart_lik_rel < 1e-9 && worst.values < 1e-7 && worst.learner < 1e-9 && worst.learner_rounds < 1e-12 && worst.reading < 1e-12 && opFails.length === 0;
+  const lines = [
+    `${cases.length} snapshots, ${nOps} reference orders, params ${JSON.stringify(params)}`,
+    `max |posterior diff| (tape only)      ${worst.post_plain.toExponential(2)}`,
+    `max rel diff, quote-reading likelihood ${worst.quote_lik_rel.toExponential(2)}`,
+    `max rel diff, smart-money likelihood   ${worst.smart_lik_rel.toExponential(2)}`,
+    `max |posterior diff| (with quotes)    ${worst.post.toExponential(2)}`,
+    `max |card value diff| ($)             ${worst.values.toExponential(2)}`,
+    `max |learned-resale model diff|       ${worst.learner.toExponential(2)} (${nLearner} snapshots)`,
+    `max |model diff| at a round start     ${worst.learner_rounds.toExponential(2)} (${learnerRounds.length} models x 3 starts)`,
+    `max |bid-reading log-odds diff|       ${worst.reading.toExponential(2)} (${readingCases.length} histories)`,
+    `order sequences that differ           ${opFails.length}`,
+    '',
+    pass ? 'PASS: the JavaScript bot matches the Python bot' : 'FAIL',
+  ];
+  for (const f of opFails.slice(0, 5)) lines.push(JSON.stringify(f));
+  const out = document.getElementById('out');
+  out.textContent = lines.join('\n');
+  out.className = pass ? 'ok' : 'bad';
+  window.__result = { pass, worst, opFails: opFails.length, cases: cases.length, nOps, nLearner, nLearnerRounds: learnerRounds.length };
+})().catch((err) => { document.getElementById('out').textContent = 'ERROR ' + err.stack; window.__result = { error: String(err) }; });
+</script>
+</body>
+</html>
