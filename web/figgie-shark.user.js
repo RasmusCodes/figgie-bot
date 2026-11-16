@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Figgie Shark
 // @namespace    figgie-bot
-// @version      0.13.0
+// @version      0.13.1
 // @description  Lets figgie-bot's Bayesian card-counting SharkBot trade your seat on figgie.com - only at tables where every other seat is a figgie.com bot.
 // @match        https://www.figgie.com/play*
 // @match        https://figgie.com/play*
@@ -14,20 +14,28 @@
  * Figgie Shark: a line-for-line JavaScript port of figgie-bot's SharkBot
  * (figgie/model.py + figgie/shark.py) plus an adapter for figgie.com/play.
  *
- * Install: Tampermonkey or Violentmonkey -> "Create a new script" -> paste this
- * file -> save.  (Or paste the whole file into the DevTools console on
- * figgie.com/play for a one-off session.)
+ * Run it: paste this whole file into the DevTools console on figgie.com/play
+ * (F12 -> Console; Chrome asks you to type "allow pasting" the first time), or
+ * install it in Tampermonkey / Violentmonkey ("Create a new script" -> paste ->
+ * save) so it loads with the page.
  *
  * Play: Play as Guest -> Create New -> fill every empty seat with a bot (+) ->
  * set "Allow Players to Join" to No -> start -> switch the Shark panel ON.
+ * With AUTO on (the default) it starts each next round itself when one ends,
+ * and once a bot is nearly out of chips (chips carry over from round to round
+ * at a table) it leaves for a fresh private table with as many bots.  So it
+ * keeps playing until you switch it OFF.
  *
  * Fair play, by construction:
- *   - It only trades when every other seat is a figgie.com bot.  If a person
- *     sits down (or a bot is standing in for a person) it stops.
+ *   - It only trades, and only starts rounds or opens tables, when every other
+ *     seat is a figgie.com bot.  If a person sits down (or a bot is standing in
+ *     for a person) it stops.
  *   - It only uses what a person in your seat can see: your own hand, the
- *     bids/offers, the trade tape and the clock.  The web client's state also
- *     contains the other players' records and a deck object; it never reads
- *     them.
+ *     bids/offers, the trade tape, the clock, and each seat's name, chips and
+ *     whether it is a bot.  The web client's state holds more than that; it
+ *     reads the deck only for the goal suit after the bell, when figgie.com
+ *     shows it to everyone (to learn which signals to trust), and nothing
+ *     else about the other players.
  *   - It sends at most a few orders per second, through the same store
  *     methods the site's own Bid/Offer/Buy/Sell/Cancel buttons call.
  */
@@ -1695,7 +1703,11 @@
   // figgie.com adapter
   // ===========================================================================
   function startAdapter() {
-    if (window.__figgieShark) return window.__figgieShark;
+    if (window.__figgieShark) {
+      console.info('[figgie-shark] already running on this page; reload the page to load a different copy.');
+      return window.__figgieShark;
+    }
+    console.info('[figgie-shark] 0.13.1 loaded: switch the Shark panel (bottom right) ON. With AUTO on it opens tables of bots and plays round after round until you switch it OFF.');
     const S = Core.SUIT_KEYS;
     const SYM = Core.SUIT_SYMBOLS;
     const CFG = {
@@ -1705,6 +1717,19 @@
       ordersPerSec: 4, // hard cap on messages we send
       ticks: 240, // the simulator's round length in ticks
       takeWaitMs: 1500, // after hitting/lifting, wait this long (or for the fill) before quoting again
+      nextRoundMs: 8000, // auto-continue: start the next round this long after the bell ...
+      nextRoundRetryMs: 15000, // ... and ask again this often until it starts
+      // ... or, once a bot has ended a round with less than this (everyone starts a table with
+      // $350, and nobody can bid more than they have), move to a fresh table of bots instead
+      freshTableBelow: 100,
+      moveStepMs: 30000, // give each step of a table move this long ...
+      moveStartMs: 120000, // ... and the new table this long to deal its first round
+      openTableMs: 5000, // at the home screen with ON and AUTO, open a table after this long
+      // the bots at every table it opens: figgie.com's 'easy', 'medium' or 'hard' (the site's own
+      // setting resets to medium whenever the page reloads, so it can't be inferred from it)
+      tableBots: 'hard',
+      nextRoundGiveUpMs: 60000, // a table that won't deal the next round this long after we asked: move
+      moveRetryMs: 120000, // after a failed move, try again this much later
     };
     // Settings for figgie.com's own bots, on top of the simulator defaults.  Every one of them bids
     // the goal suit up at some point and rarely more than one bids up anything else, so "every
@@ -1727,6 +1752,26 @@
       store: null,
       socket: null,
       enabled: false,
+      // set and forget: while ON, start the next round ourselves when one ends (only at tables
+      // where every other seat is a figgie.com bot)
+      autoNext: true,
+      nextRoundKey: null,
+      nextRoundAt: 0,
+      nextRoundAsked: false,
+      nextRoundFirstAsk: 0,
+      roundsStarted: 0,
+      // ... and when the bots are nearly broke, leave for a fresh private table with as many bots
+      freshTable: true,
+      move: null, // a table move in progress
+      tablesOpened: 0,
+      session: { rounds: 0, tables: 0, pnl: 0 },
+      roundPnl: null,
+      pnlKey: null,
+      committedKey: null,
+      moveFailed: null, // why the last move failed; AUTO stays where it is for a while
+      moveFailedAt: 0,
+      homeSince: 0,
+      table: null,
       status: 'Starting…',
       roundKey: null,
       bot: null,
@@ -1756,6 +1801,32 @@
       lastTakeOrder: null,
     };
     window.__figgieShark = app;
+    // ON / AUTO are remembered for this tab, so a copy that loads with the page (a userscript
+    // manager, or pasting it again) carries on where it was if figgie.com reloads.
+    const RUN_KEY = 'figgieShark.run';
+    let savedRun = null;
+    try {
+      savedRun = window.sessionStorage.getItem(RUN_KEY);
+      const s = savedRun ? JSON.parse(savedRun) : null;
+      if (s) {
+        app.enabled = s.enabled === true;
+        app.autoNext = s.autoNext !== false;
+        app.freshTable = s.freshTable !== false;
+        if (app.enabled) console.info('[figgie-shark] it was ON in this tab before the page reloaded, so it is ON again.');
+      }
+    } catch (e) {
+      /* storage blocked: start OFF */
+    }
+    function saveRun() {
+      const s = JSON.stringify({ enabled: app.enabled, autoNext: app.autoNext, freshTable: app.freshTable });
+      if (s === savedRun) return;
+      savedRun = s;
+      try {
+        window.sessionStorage.setItem(RUN_KEY, s);
+      } catch (e) {
+        /* storage blocked */
+      }
+    }
     const clockNow = () => {
       const t = app.store && app.store.timeLeftInMatch;
       return typeof t === 'number' ? Math.round(t * 10) / 10 : null;
@@ -1764,26 +1835,42 @@
     // ----- finding the game -----------------------------------------------------
     // The game store is the value of a React context provider near the root;
     // walking the fiber tree finds it without touching the bundler's module table.
-    function findStore() {
-      const hosts = [document.getElementById('root')].concat([...document.querySelectorAll('body > div')]).filter(Boolean);
-      for (const host of hosts) {
-        const key = Object.keys(host).find((k) => k.startsWith('__reactContainer$') || k.startsWith('__reactFiber$'));
-        if (!key) continue;
-        let start = host[key];
-        if (start && start.stateNode && start.stateNode.current) start = start.stateNode.current;
+    // findFiber returns the first component in the page (or under `under`) whose props pass `test`.
+    function findFiber(test, under) {
+      let starts = [];
+      if (under) {
+        starts = [under.child];
+      } else {
+        const hosts = [document.getElementById('root')].concat([...document.querySelectorAll('body > div')]).filter(Boolean);
+        for (const host of hosts) {
+          const key = Object.keys(host).find((k) => k.startsWith('__reactContainer$') || k.startsWith('__reactFiber$'));
+          if (!key) continue;
+          let start = host[key];
+          if (start && start.stateNode && start.stateNode.current) start = start.stateNode.current;
+          starts.push(start);
+        }
+      }
+      for (const start of starts) {
         const stack = [start];
         let seen = 0;
         while (stack.length && seen < 50000) {
           const f = stack.pop();
           seen++;
           if (!f) continue;
-          const v = f.memoizedProps && f.memoizedProps.value;
-          if (v && typeof v === 'object' && 'tradeRow' in v && typeof v.setTradeValue === 'function' && typeof v.completeTrade === 'function') return v;
+          const p = f.memoizedProps;
+          if (p && typeof p === 'object' && test(p, f)) return f;
           if (f.sibling) stack.push(f.sibling);
           if (f.child) stack.push(f.child);
         }
       }
       return null;
+    }
+    function findStore() {
+      const f = findFiber((p) => {
+        const v = p.value;
+        return !!v && typeof v === 'object' && 'tradeRow' in v && typeof v.setTradeValue === 'function' && typeof v.completeTrade === 'function';
+      });
+      return f ? f.memoizedProps.value : null;
     }
 
     function ensureSocket() {
@@ -1853,6 +1940,13 @@
       if (n < 2 || n > 5) return false;
       const H = Math.floor(40 / n); // 2 players: 20 cards, 3: 13 (one card left out), 4: 10, 5: 8
       if (hand0.reduce((a, b) => a + b, 0) !== H) return false; // hand not dealt yet
+      commitRound();
+      const table = key.slice(0, key.lastIndexOf('#'));
+      if (table !== app.table) {
+        app.table = table;
+        app.session.tables += 1;
+        app.moveFailed = null; // a new table: AUTO may move on from this one when its bots run low
+      }
       app.seatIds = players.map((p) => p.seatId).sort((a, b) => a - b);
       app.seatIndex = new Map(app.seatIds.map((sid, i) => [sid, i]));
       app.mySeat = me.seatId;
@@ -1900,6 +1994,15 @@
       app.lastTakeOrder = null;
       for (const t of tapeTrades()) feedTrade(t); // catch up if we joined mid-round
       return true;
+    }
+
+    // what this page has played so far, for the panel: rounds, tables and P&L (incl. antes)
+    function commitRound() {
+      if (app.roundPnl === null || app.pnlKey === app.committedKey) return;
+      app.committedKey = app.pnlKey;
+      app.session.rounds += 1;
+      app.session.pnl += app.roundPnl;
+      app.roundPnl = null;
     }
 
     function loadJSON(key) {
@@ -2100,8 +2203,92 @@
       }
     }
 
+    // A tab you can't see gets no animation frames, and figgie.com only finishes a screen change
+    // (and unmounts the old screen) when its transition animation has run.  So any frame the page
+    // asked for and hasn't had within a quarter second is delivered from this script's clock
+    // instead: a table move then completes in a background tab too.  In a visible tab frames come
+    // every 16 ms and this never fires.
+    const flushFrames = (function keepFramesComing() {
+      const nativeRaf = typeof window.requestAnimationFrame === 'function' ? window.requestAnimationFrame.bind(window) : null;
+      const nativeCaf = typeof window.cancelAnimationFrame === 'function' ? window.cancelAnimationFrame.bind(window) : null;
+      if (!nativeRaf || !nativeCaf) return () => {};
+      const pending = new Map(); // native id -> { cb, at }
+      window.requestAnimationFrame = function (cb) {
+        let id = 0;
+        id = nativeRaf((ts) => {
+          if (pending.delete(id)) cb(ts);
+        });
+        pending.set(id, { cb, at: performance.now() });
+        return id;
+      };
+      window.cancelAnimationFrame = function (id) {
+        pending.delete(id);
+        nativeCaf(id);
+      };
+      return function flush() {
+        if (!pending.size) return;
+        const now = performance.now();
+        const due = [];
+        for (const [id, e] of pending) if (now - e.at > 250) due.push([id, e]);
+        for (const [id, e] of due) {
+          pending.delete(id);
+          nativeCaf(id);
+          try {
+            e.cb(now);
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      };
+    })();
+
+    // Two ways figgie.com's page can get stuck that only a reload fixes: its app crashes (it
+    // unmounts everything and goes blank), or it hangs on "Logging in as a guest" (seen after the
+    // page was starved in a hidden tab; a reload logs the guest straight back in).  A copy
+    // installed in a userscript manager comes back with the page and carries on (ON and AUTO are
+    // remembered), so it reloads, at most once every 5 minutes; a pasted copy would be gone, so it
+    // says so instead.  (A login screen asking you to Play as Guest is left to you.)
+    let blankSince = 0;
+    let loginSince = 0;
+    function checkPageAlive() {
+      const root = document.getElementById('root');
+      const st = app.store;
+      const now = Date.now();
+      const blank = !!st && !!root && root.childElementCount === 0;
+      const stuck = !!st && !!root && st.currentScreen === 'Login' && /Logging in as a guest/i.test(root.innerText || '');
+      blankSince = blank ? blankSince || now : 0;
+      loginSince = stuck ? loginSince || now : 0;
+      const what = blank && now - blankSince > 15000 ? 'crashed (it went blank)' : stuck && now - loginSince > 90000 ? 'is stuck logging in' : null;
+      if (!what) return true;
+      const managed = typeof GM_info !== 'undefined'; // eslint-disable-line no-undef
+      let last = 0;
+      try {
+        last = Number(window.sessionStorage.getItem('figgieShark.reloadAt')) || 0;
+      } catch (e) {
+        /* storage blocked */
+      }
+      if (managed && app.enabled && app.autoNext && now - last > 300000) {
+        try {
+          window.sessionStorage.setItem('figgieShark.reloadAt', String(now));
+        } catch (e) {
+          /* storage blocked */
+        }
+        console.warn(`[figgie-shark] figgie.com ${what}; reloading the page.`);
+        window.location.reload();
+      } else {
+        app.status = `figgie.com ${what}. Reload the page` + (managed ? '.' : ' and paste the script again (it remembers it was ON).');
+      }
+      return false;
+    }
+
     function loop() {
       try {
+        flushFrames();
+        saveRun();
+        if (!checkPageAlive()) {
+          render();
+          return;
+        }
         step();
         app.error = null;
       } catch (e) {
@@ -2122,16 +2309,19 @@
       }
       ensureSocket();
       const st = app.store;
+      if (app.move && stepMove(st)) return;
       const me = myPlayer();
       const players = Array.isArray(st.players) ? st.players : [];
       app.tradingOpen = false;
       const onGameScreen = st.isViewingGameScreen === true || st.currentScreen === 'Game';
       if (!st.matchId || !me || (st.user && st.user.isSpectator) || !onGameScreen) {
+        commitRound();
         app.roundKey = null;
         if (app.bot && app.bot.resale && !app.bot.learner) app.resaleMemory = app.bot.resale.memory();
         if (app.bot && app.bot.learner) saveLearner();
         app.bot = null;
-        app.status = 'Open a table: Create New → fill the seats with bots (+) → Allow Players to Join: No → start.';
+        if (maybeOpenTable(st)) return;
+        app.status = (app.moveFailed !== null ? `Couldn't open a table by itself (${app.moveFailed}); it tries again shortly. ` : '') + 'Open a table: Create New → fill the seats with bots (+) → Allow Players to Join: No → start.';
         return;
       }
       const key = st.matchId + '#' + st.currentRound;
@@ -2147,10 +2337,15 @@
 
       const t = st.timeLeftInMatch;
       app.tradingOpen = !st.isRoundEnded && !st.isPaused && !st.isReplayMode && !st.timerHasEnded && typeof t === 'number' && (st.isStandardMode === false || t > 0);
-      if (st.isRoundEnded || st.timerHasEnded) {
+      // (timerHasEnded stays set for a few seconds into the next round, while its clock is full)
+      if (st.isRoundEnded || (st.timerHasEnded && (st.isStandardMode === false || !(t > 0)))) {
         // chips are read after the ante has been taken, so add it back for the round's P&L
         const pnl = typeof me.chipCount === 'number' && typeof app.startChips === 'number' ? me.chipCount - app.startChips - Math.floor(200 / app.nPlayers) : null;
         app.status = 'Round over' + (pnl !== null ? ` — ${pnl >= 0 ? '+' : '−'}$${Math.abs(pnl)} this round (incl. ante).` : '.');
+        if (pnl !== null && st.isRoundEnded) {
+          app.roundPnl = pnl; // final once the results are in; added to the session's total when we move on
+          app.pnlKey = app.roundKey;
+        }
         if (app.bot && app.endedRound !== app.roundKey) {
           // the bell: figgie.com now shows everyone the goal (never read before the round is
           // over), so the bid reading can score itself against it (read_learn)
@@ -2164,6 +2359,7 @@
           saveLearner(); // what this round taught the models, for the next table or reload
           app.savedRound = app.roundKey;
         }
+        autoContinue(st);
         return;
       }
       if (!app.tradingOpen) {
@@ -2205,6 +2401,213 @@
       }
     }
 
+    // Set and forget: once a round is over, start the next one (what the host's "New Round" button
+    // does), a few seconds after the bell so the results and the learners' updates land first,
+    // and again every so often until it starts.  Once a bot is nearly broke, move to a fresh table
+    // of bots instead.  Only while ON and AUTO, and only at a table where every other seat is a
+    // figgie.com bot.
+    function autoContinue(st) {
+      if (!app.enabled || !app.autoNext || app.humans.length || !st.isRoundEnded) return;
+      const now = Date.now();
+      if (!st.socket || typeof st.socket.newRound !== 'function') {
+        app.status += ' AUTO can\'t start rounds on this version of figgie.com; start the next one yourself.';
+        return;
+      }
+      // every player's chips are on their seat for all to see
+      const canMove = app.freshTable && st.isStandardMode !== false && !moveBlocked(now);
+      const low = canMove ? poorestOpponent(st) : null;
+      const move = low !== null && low.chipCount < CFG.freshTableBelow;
+      if (app.nextRoundKey !== app.roundKey) {
+        app.nextRoundKey = app.roundKey;
+        app.nextRoundAt = now + CFG.nextRoundMs;
+        app.nextRoundAsked = false;
+      } else if (now >= app.nextRoundAt) {
+        // ... and if the table won't deal another round, find one that will
+        const stuck = canMove && app.nextRoundAsked && now - app.nextRoundFirstAsk > CFG.nextRoundGiveUpMs;
+        if (move || stuck) {
+          beginMove(st, move ? `${low.name} is down to $${low.chipCount}` : "this table won't start another round");
+          return;
+        }
+        if (!app.nextRoundAsked) app.nextRoundFirstAsk = now;
+        app.nextRoundAt = now + CFG.nextRoundRetryMs;
+        st.socket.newRound(st.matchId);
+        app.nextRoundAsked = true;
+        app.roundsStarted += 1;
+      }
+      const secs = Math.max(0, Math.ceil((app.nextRoundAt - now) / 1000));
+      if (move) app.status += ` ${low.name} is down to $${low.chipCount}: moving to a fresh table in ${secs}s (AUTO).`;
+      else app.status += app.nextRoundAsked ? ' Starting the next round… (AUTO)' : ` Next round in ${secs}s (AUTO).`;
+      if (app.moveFailed !== null) app.status += ` (The last table move failed: ${app.moveFailed}.)`;
+    }
+
+    function poorestOpponent(st) {
+      let low = null;
+      for (const p of Array.isArray(st.players) ? st.players : []) {
+        if (!st.user || p.playfabId === st.user.playfabId || typeof p.chipCount !== 'number') continue;
+        if (low === null || p.chipCount < low.chipCount) low = p;
+      }
+      return low;
+    }
+
+    // ----- moving to a fresh table ---------------------------------------------------------------
+    // Done the way a person would, through figgie.com's own handlers: the in-game "Leave Game"
+    // (which closes a table no other person sits at), "Create New" → "Create Game" (standard),
+    // "Allow players to join?" → No, then a bot on each empty seat; the full table then deals
+    // after its countdown, and the loop above takes over.  Each step has a deadline; if one passes,
+    // the move stops where it is, says why, and AUTO stays at whatever table it is at.
+    const MOVE_FAILS = {
+      leave: 'leaving the table timed out',
+      create: 'creating a table timed out',
+      lobby: 'seating the bots timed out',
+      start: 'the new table never dealt',
+    };
+    const newMove = (phase, bots) => ({ phase, until: Date.now() + CFG.moveStepMs, to: null, left: null, bots, at: 0, tabAt: 0, addAt: 0, retries: 0 });
+    function beginMove(st, why) {
+      saveLearner();
+      app.move = newMove('leave', Math.max(3, Math.min(4, app.nPlayers - 1)));
+      console.info(`[figgie-shark] ${why}: moving to a fresh table.`);
+    }
+    // after a failed move, wait a while before trying again (at this table or the home screen)
+    const moveBlocked = (now) => app.moveFailed !== null && now - app.moveFailedAt < CFG.moveRetryMs;
+    // At the home screen with ON and AUTO on, open a table after a few seconds' grace (so switching
+    // ON there is all it takes; it also recovers if figgie.com drops back to the home screen).
+    function maybeOpenTable(st) {
+      if (!app.enabled || !app.autoNext || !app.freshTable || moveBlocked(Date.now()) || !homeTab()) {
+        app.homeSince = 0;
+        return false;
+      }
+      const now = Date.now();
+      if (!app.homeSince) app.homeSince = now;
+      const wait = Math.ceil((app.homeSince + CFG.openTableMs - now) / 1000);
+      if (wait > 0) {
+        app.status = `Opening a private table with 3 ${CFG.tableBots} bots in ${wait}s (AUTO; switch AUTO off to pick a table yourself).`;
+        return true;
+      }
+      app.homeSince = 0;
+      app.move = newMove('create', 3);
+      console.info('[figgie-shark] opening a private table of bots.');
+      return true;
+    }
+    function movePhase(m, phase, ms) {
+      m.phase = phase;
+      m.until = Date.now() + ms;
+      m.at = 0;
+    }
+    function failMove(reason) {
+      app.move = null;
+      app.moveFailed = reason;
+      app.moveFailedAt = Date.now();
+      console.warn(`[figgie-shark] table move failed: ${reason}. It tries again in ${Math.round(CFG.moveRetryMs / 60000)} minutes, or open a table yourself and it carries on there.`);
+      return false;
+    }
+    const homeTab = () => findFiber((p, f) => (f.key === 'Create New' || f.key === '+ New') && typeof p.onPress === 'function');
+
+    // Returns true while the move is under way (the bot has nothing else to do then).
+    function stepMove(st) {
+      const m = app.move;
+      const now = Date.now();
+      if (!app.enabled || !app.autoNext) {
+        app.move = null; // switched off mid-move: leave things as they are
+        return false;
+      }
+      if (now > m.until) return failMove(MOVE_FAILS[m.phase]);
+      const onGame = st.isViewingGameScreen === true || st.currentScreen === 'Game';
+      if (m.phase === 'leave') {
+        if (homeTab()) {
+          movePhase(m, 'create', CFG.moveStepMs);
+        } else if (!m.at) {
+          // the confirmation behind the in-game menu's Leave Game
+          const dlg = findFiber((p) => typeof p.onConfirm === 'function' && 'isUserMatchHost' in p && 'numHumans' in p && p.action !== 'endMatch');
+          if (!dlg) return failMove("figgie.com's Leave Game wasn't found");
+          m.at = now;
+          dlg.memoizedProps.onConfirm();
+        }
+        app.status = 'The bots are nearly out of chips: leaving for a fresh table…';
+        return true;
+      }
+      if (m.phase === 'create') {
+        // The old game screen stays mounted until its exit animation has finished, and Create Game
+        // empties the player list, which crashes that screen (the whole page goes blank).
+        if (findFiber((p) => !!p.route && p.route.name === 'Game')) {
+          app.status = 'Leaving the old table…';
+          return true;
+        }
+        const lobby = findFiber((p) => !!p.route && p.route.name === 'Lobby' && !!p.route.params && !!p.route.params.matchId && p.route.params.matchId !== m.left);
+        if (lobby) {
+          m.to = lobby.memoizedProps.route.params.matchId;
+          movePhase(m, 'lobby', CFG.moveStepMs);
+        } else if (!m.at) {
+          const card = findFiber((p) => !!p.config && p.config.mode === 'standard' && p.config.allHandsAreVisible === false);
+          const create = card && findFiber((p) => p.text === 'Create Game' && typeof p.onPress === 'function', card);
+          if (create) {
+            m.at = now; // pressed once only: a second press could open a second table
+            if (typeof st.setBotDifficulty === 'function') st.setBotDifficulty(CFG.tableBots);
+            create.memoizedProps.onPress({ preventDefault() {} });
+          } else if (now - m.tabAt > 2000) {
+            const tab = homeTab();
+            if (tab) {
+              m.tabAt = now;
+              tab.memoizedProps.onPress();
+            }
+          }
+        }
+        app.status = 'Opening a fresh table…';
+        return true;
+      }
+      if (m.phase === 'lobby') {
+        const players = Array.isArray(st.players) ? st.players : [];
+        const others = players.filter((p) => !st.user || p.playfabId !== st.user.playfabId);
+        if (others.some((p) => !p.isBot || p.isHumanBot)) {
+          // someone got in before it was closed: leave that lobby and open another
+          const leave = m.retries < 2 && findFiber((p) => p.text === 'Leave Game' && typeof p.onPress === 'function');
+          if (!leave) return failMove('a person sat down at the new table');
+          m.retries += 1;
+          m.left = m.to; // (its screen can linger while it animates out)
+          leave.memoizedProps.onPress();
+          movePhase(m, 'create', CFG.moveStepMs);
+          return true;
+        }
+        if (st.isMatchPublic !== false) {
+          // "Allow players to join?": its Yes and No both flip it
+          if (now - m.at > 1500) {
+            const box = findFiber((p) => Array.isArray(p.children) && p.children.some((c) => !!c && !!c.props && c.props.children === 'Allow players to join?'));
+            const no = box && findFiber((p) => typeof p.onPress === 'function' && !!p.children && !!p.children.props && p.children.props.children === 'No', box);
+            if (no) {
+              m.at = now;
+              no.memoizedProps.onPress();
+            }
+          }
+          app.status = 'Fresh table: closing it to other players…';
+          return true;
+        }
+        if (st.botDifficulty !== CFG.tableBots && typeof st.setBotDifficulty === 'function') {
+          st.setBotDifficulty(CFG.tableBots); // the lobby's selector shows it; the server gets it here and at the start
+          st.socket.updateMatchData(m.to, false);
+        }
+        if (others.length < m.bots) {
+          if (now - m.addAt > 2500) {
+            const taken = new Set(players.map((p) => p.seatId));
+            let seat = 1;
+            while (taken.has(seat)) seat++;
+            m.addAt = now;
+            st.socket.addBot(m.to, seat);
+          }
+          app.status = `Fresh table: seating bot ${others.length + 1} of ${m.bots}…`;
+          return true;
+        }
+        movePhase(m, 'start', CFG.moveStartMs);
+      }
+      // 'start': the full table counts down and deals by itself
+      if (onGame && st.matchId === m.to) {
+        app.move = null;
+        app.tablesOpened += 1;
+        console.info(`[figgie-shark] fresh table ${m.to} is dealing (${app.tablesOpened} opened so far).`);
+        return false;
+      }
+      app.status = 'Fresh table: waiting for the countdown and the deal…';
+      return true;
+    }
+
     // ----- overlay -------------------------------------------------------------------------------
     const host = document.createElement('div');
     host.id = 'figgie-shark';
@@ -2221,8 +2624,11 @@
         .tick { margin-left: auto; color: #b9b3d9; font-size: 11px; }
         button { font: inherit; font-weight: 700; border: 0; border-radius: 999px; padding: 4px 12px; cursor: pointer; color: #1b1340; background: #b9b3d9; }
         button.on { background: #3ddc97; }
+        button.auto { padding: 4px 9px; font-size: 10px; letter-spacing: .4px; }
         .body { padding: 8px 10px 10px; }
         .status { color: #d9d4f5; margin-bottom: 8px; }
+        .session { margin: -4px 0 8px; font-size: 11px; }
+        .session:empty { display: none; }
         .row { display: grid; grid-template-columns: 18px 1fr 34px 46px 76px; align-items: center; gap: 6px; padding: 2px 0; }
         .mkt { text-align: right; color: #f2c14e; font-size: 11px; }
         .sym { font-size: 15px; text-align: center; }
@@ -2237,9 +2643,10 @@
         .hidden { display: none; }
       </style>
       <div class="panel">
-        <div class="head"><span class="title">\u{1F988} Figgie Shark</span><span class="tick"></span><button class="toggle">OFF</button></div>
+        <div class="head"><span class="title">\u{1F988} Figgie Shark</span><span class="tick"></span><button class="auto" title="Start the next round when one ends, and move to a fresh table of bots once they run low on chips (all-bot tables only)">AUTO</button><button class="toggle">OFF</button></div>
         <div class="body">
           <div class="status"></div>
+          <div class="session muted"></div>
           <div class="rows"></div>
           <div class="acts"></div>
         </div>
@@ -2250,6 +2657,12 @@
       e.stopPropagation();
       app.enabled = !app.enabled;
       if (!app.enabled) cancelOurQuotes();
+      render();
+    });
+    const autoBtn = $('.auto');
+    autoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      app.autoNext = !app.autoNext;
       render();
     });
     $('.head').addEventListener('click', () => $('.body').classList.toggle('hidden'));
@@ -2281,7 +2694,12 @@
       if (!host.isConnected && document.body) document.body.appendChild(host);
       toggle.textContent = app.enabled ? 'ON' : 'OFF';
       toggle.className = 'toggle' + (app.enabled ? ' on' : '');
+      autoBtn.className = 'auto' + (app.autoNext ? ' on' : '');
       $('.status').textContent = app.status;
+      const ss = app.session;
+      $('.session').textContent = ss.rounds
+        ? `This page so far: ${ss.rounds} round${ss.rounds > 1 ? 's' : ''} at ${ss.tables} table${ss.tables > 1 ? 's' : ''}, ${ss.pnl >= 0 ? '+' : '−'}$${Math.abs(ss.pnl)} (incl. antes)`
+        : '';
       $('.tick').textContent = app.bot && app.tradingOpen ? `tick ${app.tick}/240` : '';
       const v = app.bot && app.bot.val;
       const pg = app.bot ? app.bot.beliefs.pGoal() : null;

@@ -263,21 +263,52 @@ it has exploitable habits. The known ones, with what they cost:
 
 ## Play it on figgie.com
 
-1. Install a userscript manager: [Tampermonkey](https://www.tampermonkey.net/)
-   or [Violentmonkey](https://violentmonkey.github.io/).
-2. Create a new script, replace its contents with
-   [`web/figgie-shark.user.js`](web/figgie-shark.user.js), and save.
-3. Open <https://www.figgie.com/play/> and click **Play as Guest**.
-4. **Create New** → **Standard** → **Create Game**.
-5. In the lobby set **Allow players to join?** to **No**, pick a **Bot
-   Difficulty**, click **+** on the empty seats to add figgie.com bots, then
-   click **Are you ready?**
-6. In the **Figgie Shark** panel (bottom right) switch **ON**. It trades your
-   seat from the opening bell; switch it **OFF** any time (it cancels its
-   resting quotes).
+1. Open <https://www.figgie.com/play/> and click **Play as Guest**.
+2. Open the browser's console (F12 → **Console**), paste the whole of
+   [`web/figgie-shark.user.js`](web/figgie-shark.user.js) and press Enter.
+   Chrome asks you to type `allow pasting` the first time.
+3. In the **Figgie Shark** panel (bottom right) switch **ON**.
 
-No userscript manager? Paste the whole file into the DevTools console on
-figgie.com/play. It lasts until the page reloads.
+That's all. With **AUTO** on (the default, next to ON) it:
+* opens a private table with three Hard bots by itself, if you switch ON at
+  the home screen (after a 5-second countdown);
+* starts each next round 8 seconds after the bell;
+* moves to a fresh private table with as many bots once one of them ends a
+  round below $100. Everyone sits down with $350, chips carry over from round
+  to round at a table, and a bot can't bid more than it has, so after five or
+  six rounds against the shark the market dries up.
+
+So it plays until you switch it OFF (it cancels its resting quotes) or close
+the tab. A pasted script is gone when the page reloads; paste it again and it
+carries on (ON and AUTO are remembered for the tab).
+
+For runs nobody watches, install it with a userscript manager instead
+([Tampermonkey](https://www.tampermonkey.net/) or
+[Violentmonkey](https://violentmonkey.github.io/): create a new script,
+replace its contents with the file, save). Then it loads with every page, and
+it gets figgie.com back on its feet by itself: if the site's page crashes
+(goes blank) or hangs on "Logging in as a guest", it reloads the page, which
+logs the guest straight back in, and opens the next table. The one thing it
+can't do for you is log in: if figgie.com asks you to **Play as Guest**,
+click it and it picks up from the home screen.
+
+To pick the table yourself, do it before switching ON (or with AUTO off):
+**Create New** → **Standard** → **Create Game**, then in the lobby set
+**Allow players to join?** to **No**, pick a **Bot Difficulty**, click **+**
+on the empty seats to add figgie.com bots, and click **Are you ready?** It
+plays any table where every other seat is a figgie.com bot. The tables it
+opens itself have Hard bots.
+
+From the console:
+
+```js
+__figgieShark.enabled = true              // the same as switching ON
+__figgieShark.autoNext = false            // AUTO off: no next rounds or new tables
+__figgieShark.freshTable = false          // next rounds, but stay at this table
+__figgieShark.cfg.freshTableBelow = 60    // move on below $60 instead of $100
+__figgieShark.cfg.tableBots = 'medium'    // bots at the tables it opens
+__figgieShark.resetLearner()              // forget what it has learned
+```
 
 The panel shows the bot's live P(goal) for each suit (in figgie.com's order,
 ♠ ♣ ♦ ♥), the highest bid any
@@ -286,19 +317,30 @@ and what it would give up by selling one (`sell`), its last few trades, the
 state of the resale exploit (on or off, cards held, resales that worked and
 failed, its P&L so far, and how many offers the learned model has watched, the
 chance it gives a $1 card of being bid back up, and how its own resales have
-compared), and the round's P&L when the bell rings. It keeps trading in a
-background tab (its clock runs in a Web Worker, which browsers don't
-throttle), but not while the computer sleeps. The learned resale model is
-saved in your browser so it keeps learning across tables and reloads; run
-`__figgieShark.resetLearner()` in the console to start it over.
+compared), and the round's P&L when the bell rings, with AUTO's countdown to
+the next round or table and a running total for the page.
+
+**Leave the tab visible** (a window of its own is fine). Its trading clock
+runs in a Web Worker, which browsers don't throttle, and it supplies the
+animation frames a hidden page doesn't get, so a background tab still
+changes tables. But a page the browser starves can't react to the market:
+in testing, a hidden page fell up to a minute behind figgie.com's clock
+while its resting quotes sat on the book, and its rounds suffered. Nothing
+runs while the computer sleeps. What the learners have learned is saved in
+your browser, so it keeps learning across tables and reloads;
+`__figgieShark.resetLearner()` starts it over.
 
 ### Fair play
 
-* **Bots only.** It trades only when every other seat is a figgie.com bot.
-  If a person is seated, or a bot is standing in for one, it stands by.
+* **Bots only.** It trades, starts rounds and opens tables only when every
+  other seat is a figgie.com bot, and the tables it opens are private
+  (**Allow players to join?** No). If a person is seated, or a bot is
+  standing in for one, it stands by.
 * **Only what you can see.** It uses your own hand, the bids and offers, the
-  trade tape and the clock. The web client's state also holds the other
-  players' records and a `deck` object; the bot never reads them.
+  trade tape, the clock, and each seat's name, chips (shown on every seat)
+  and whether it is a bot. The web client's state holds more than that; the
+  bot reads the `deck` only for the goal suit after the bell, when the site
+  shows it to everyone, and nothing else about the other players.
 * **Human speed.** At most 4 orders a second, through the same store
   functions the site's own Bid / Offer / Buy / Sell / Cancel buttons call.
 * Keep it to private tables and guest accounts, away from ranked play, and
@@ -320,7 +362,18 @@ figgie.com is an Expo / React Native Web app talking socket.io to
   applying the same checks as the UI (prices 1-99, bids must beat the bid,
   never crossing its own quotes);
 * maps the round clock onto the simulator's 240-tick schedule, and accepts
-  tables of 2-5 players (figgie.com itself requires 4 or 5).
+  tables of 2-5 players (figgie.com itself requires 4 or 5);
+* starts the next round with the socket's `newRound` (what the host's **New
+  Round** button sends), and opens tables through the app's own handlers,
+  found the same way in the fiber tree: the in-game **Leave Game**
+  confirmation, **Create New** → **Create Game**, the lobby's **Allow players
+  to join?** toggle, and `addBot` for each empty seat. The lobby deals on its
+  own once it is full;
+* wraps `requestAnimationFrame` so that a frame the page has waited a
+  quarter second for (in a hidden tab, forever) is delivered from the
+  script's clock instead: figgie.com only removes the old screen when its
+  exit animation has run, and creating a table under a still-mounted game
+  screen crashes the app.
 
 It was written against figgie.com web **v1.3.7.1** (November 2026). It relies
 on the app's internals, so a site update can break it; the panel then reports
