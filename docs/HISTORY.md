@@ -1268,3 +1268,103 @@ without a stall.
 * **The other weak round** (+$34) was hearts. The bot sold a heart into a
   $14 bid with hearts at 39% (spades 46%) and never contested them; Penguin
   took the bonus.
+
+## 0.13.1: set and forget
+
+The bot is unchanged; the userscript can now be pasted into the console and
+left alone. Three things used to need a person:
+
+* **The next round.** Only the table's host, you, can start one. With
+  **AUTO** on (the default) the script starts it 8 seconds after the bell,
+  with the `newRound` message the host's **New Round** button sends, and asks
+  again every 15 seconds until it starts. A table that won't deal another
+  round within a minute is left for a fresh one.
+* **Broke bots.** Everyone sits down with $350 and chips carry over from
+  round to round. figgie.com takes the ante even from a player who can't
+  cover it, so a bot's chips can go negative, and nobody can bid more than
+  they hold, so a broke bot can only sell. That is what spoiled v13's last
+  two rounds. Once any bot ends a round below $100 (two antes), the script
+  leaves and opens a fresh private table with as many bots. At $100 a bot
+  still has $50 to bid with after the next ante, so this fires well before
+  any bot goes negative, and long before the shark could hold $1,300 of a
+  table's $1,400. It reads the bots' chips from their seats, where every
+  player sees them.
+* **Opening a table.** Switched ON at the home screen, it opens one itself
+  after a 5-second countdown.
+
+A table move uses the app's own handlers, found in the React fiber tree, so
+the site does exactly what it does for a person:
+1. the in-game **Leave Game** confirmation, which closes a table no other
+   person sits at;
+2. **Create New** → **Create Game** (standard), with the bot difficulty set
+   to Hard first;
+3. **Allow players to join?** → **No**;
+4. `addBot` on each empty seat. The full lobby deals by itself after a
+   30-second countdown.
+
+Each step has a deadline. If one passes, the panel says why, the script stays
+where it is, and it tries again two minutes later. ON and AUTO are remembered
+for the tab, so a copy that loads with the page (a userscript manager, or
+pasting it again) carries on after a reload.
+
+### Live test (2026-11-16)
+
+| Step | Time |
+|---|---|
+| Home screen → private lobby with 3 bots seated | 11-27 s |
+| Lobby countdown → deal | 30 s |
+| Bell → next round dealt | 8 s, trading 6 s later |
+| Bell → old table closed → new lobby with 3 bots seated | 15 s |
+
+Rounds, by table (all against Hard bots except where noted):
+
+| Table | How it got there | Rounds (P&L) |
+|---|---|---|
+| 1 | opened from the home screen | +98, then a page reload mid-round |
+| 2 | your own table, rejoined after the reload | −35 (from mid-round) |
+| 3 | forced move (Medium bots: the bug below) | +102 |
+| 4 | opened from home after another reload | +115, +153, −56, (tab closed) |
+| 5 | opened from home on a fresh page | −19, +11, then a chip-based move that crashed the page |
+| 6 | opened from home after the crash, with the fix | −32, then a forced move from a hidden pane |
+| 7 | that move (bell to trading at the new table: 52 s) | +5, then figgie.com hung on "Logging in as a guest" |
+| 8 | opened from home after a reload | |
+
+AUTO started every next round it was asked to (6 of 6). It opened a table
+from the home screen six times out of six, and every move reached a new
+table except the one that crashed the page.
+
+Tables 5 and 6 (−19, +11, −32) were played in a hidden browser pane, and a
+hidden pane starves the page: at one point figgie.com's clock in the page
+ran a minute behind the server's. Nothing in the page, the bot included, can
+react meanwhile, and its resting quotes sit on the book. The three rounds
+played while someone was watching made +98, +115 and +153. Table 4's −56
+came between check-ins 1½ minutes apart, when the pane may have been hidden
+too. Leave the tab visible.
+
+What broke on the way, and the fixes:
+* **A reload took the pasted copy with it** partway through round 2. ON and
+  AUTO are now remembered for the tab; after the next reload the new copy
+  came back ON by itself and had a Hard table dealing 41 seconds later.
+* **The first forced move opened a Medium table.** figgie.com keeps the bot
+  difficulty in the page and resets it to Medium on every reload, so "keep
+  the last table's difficulty" can't be read from it. Every table the
+  script opens now has Hard bots (`cfg.tableBots`).
+* **For six seconds into each new round the panel said "Round over −$50".**
+  The site's timer-ended flag stays set until the new round's clock starts.
+* **A move crashed figgie.com's page** while it was in a hidden pane. The
+  old game screen stays mounted until its exit animation finishes, and a
+  page you can't see gets no animation frames, so it was still there when
+  Create Game emptied the player list; one of its trade buttons then read
+  `seatId` of a missing player, and React unmounted the whole page. The
+  script now waits until the old game screen is gone before Create Game,
+  and delivers any animation frame the page has waited a quarter second for
+  from its own clock, so screen changes finish in a background tab too. The
+  next move from a hidden pane went through cleanly.
+* **figgie.com hung on "Logging in as a guest"** in the middle of a round,
+  as it did in earlier tests after the page had been starved, and was still
+  hanging 80 seconds later. A reload logged the guest straight back in and
+  the script had the next table dealing a minute later. A copy loaded by a
+  userscript manager now does that by itself: when the page has hung there
+  for 90 seconds, or gone blank for 15, it reloads it (at most once every 5
+  minutes). A pasted copy would be lost in a reload, so it says to reload and
+  paste again instead.
