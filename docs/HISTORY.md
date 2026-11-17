@@ -1368,3 +1368,63 @@ What broke on the way, and the fixes:
   for 90 seconds, or gone blank for 15, it reloads it (at most once every 5
   minutes). A pasted copy would be lost in a reload, so it says to reload and
   paste again instead.
+
+### 0.13.2: leaving a table in the safe order
+
+The user reported that it still crashed now and then, with no details, and
+the crashed tab was gone, so this fix comes from reading figgie.com's code
+rather than from a stack trace. figgie.com's game screen crashes the whole
+page if it renders while the store's player list is empty: its trade
+buttons read the `seatId` of "your player, or else the first player"
+(0.13.1's crash). Several socket events replace that list with whatever the
+server sends. And the site's own Leave Game, which 0.13.1 called, closes the
+table first and changes screens second, so the server's replies to the
+closing can arrive while the game screen is still animating out. Its "match
+closed" handler then resets the match and navigates home a second time, and
+any reply that carries an empty player list crashes it. Whether that
+happens depends on timing. A person clicking Leave Game runs the same risk,
+but the script leaves a table every five or so rounds.
+
+0.13.2 does it the other way round. It sends the game screen home (the same
+navigation Leave Game uses), waits until that screen has unmounted (its
+socket listeners go with it), and only then closes the old table and resets
+the match. Two smaller changes:
+* The animation-frame helper now steps in only once the page has had no
+  frame for half a second, so in a visible tab it changes nothing at all.
+* Every uncaught error on the page (figgie.com's or the script's) is kept in
+  the browser with its stack and what the script was doing
+  (`__figgieShark.errors`, and `localStorage['figgieShark.errors']` after a
+  reload), so the next crash leaves evidence.
+
+A stress test (2026-11-17, desktop-sized window, a move after every round
+and each round ended after 20 seconds of trading) opened 12 tables, 11 of
+them by moves, with no crash. It found a second fault, which looks just like
+a crash from the user's chair. In the lobby of the 8th table, figgie.com
+threw the script back to the home screen. A logger on the socket then showed
+that figgie.com's "match closed" message is empty (`onMatchClosed {}`), and
+both the lobby and the game screen act on it without asking which table it
+was about:
+* the lobby says "Match has been cancelled due to inactivity" and goes home;
+* the game screen goes home and resets the match.
+
+On the web that message is a browser `alert()`, which freezes the whole
+page, script included, until someone clicks OK. Any table this page left
+without closing, such as one abandoned by a reload or a lobby it was thrown
+out of, is eventually closed by the server "for inactivity". That kicks the
+script out of whatever it is playing then, and leaves another abandoned
+table behind.
+
+So while ON with AUTO:
+* a "match closed" that arrives on the game screen or in a lobby the script
+  is opening is ignored, unless this page sent "close" or "leave" in the
+  last 10 seconds;
+* after closing the old table, the script waits (5 seconds at most) for the
+  server's "match closed" before it opens the next one;
+* a lobby it is thrown out of, or gives up on, is closed before it opens
+  another table;
+* figgie.com's `alert()`s go to the console and `__figgieShark.errors`
+  instead of freezing the page.
+
+The browser pane went away before these last changes had run through a "match
+closed" from an old table; they were written against the captured messages
+and figgie.com's code.
