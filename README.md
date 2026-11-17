@@ -282,6 +282,13 @@ So it plays until you switch it OFF (it cancels its resting quotes) or close
 the tab. A pasted script is gone when the page reloads; paste it again and it
 carries on (ON and AUTO are remembered for the tab).
 
+While it's ON with AUTO it also keeps figgie.com from interrupting the run:
+the site announces some things (such as an old table being closed for
+inactivity) with a browser pop-up that freezes the page until someone clicks
+OK, and acts on "match closed" messages meant for other tables by throwing
+you out of the one you're playing. The script logs those pop-ups instead and
+ignores the stray messages.
+
 For runs nobody watches, install it with a userscript manager instead
 ([Tampermonkey](https://www.tampermonkey.net/) or
 [Violentmonkey](https://violentmonkey.github.io/): create a new script,
@@ -308,7 +315,14 @@ __figgieShark.freshTable = false          // next rounds, but stay at this table
 __figgieShark.cfg.freshTableBelow = 60    // move on below $60 instead of $100
 __figgieShark.cfg.tableBots = 'medium'    // bots at the tables it opens
 __figgieShark.resetLearner()              // forget what it has learned
+__figgieShark.errors                      // page errors, with what it was doing
 ```
+
+If figgie.com's page ever crashes or misbehaves, `copy(JSON.stringify(__figgieShark.errors))`
+in Chrome's console copies the last 30 errors (figgie.com's or the script's,
+with stack traces and what the script was doing at the time). They are kept
+in the browser, so after a reload `localStorage['figgieShark.errors']` still
+has them.
 
 The panel shows the bot's live P(goal) for each suit (in figgie.com's order,
 ♠ ♣ ♦ ♥), the highest bid any
@@ -369,11 +383,18 @@ figgie.com is an Expo / React Native Web app talking socket.io to
   confirmation, **Create New** → **Create Game**, the lobby's **Allow players
   to join?** toggle, and `addBot` for each empty seat. The lobby deals on its
   own once it is full;
-* wraps `requestAnimationFrame` so that a frame the page has waited a
-  quarter second for (in a hidden tab, forever) is delivered from the
-  script's clock instead: figgie.com only removes the old screen when its
-  exit animation has run, and creating a table under a still-mounted game
-  screen crashes the app.
+* wraps `requestAnimationFrame` so that, once the page has had no frame for
+  half a second (a hidden tab), a frame it has waited a quarter second for
+  is delivered from the script's clock instead: figgie.com only removes the
+  old screen when its exit animation has run, and creating a table under a
+  still-mounted game screen crashes the app;
+* leaves a table by sending the game screen home first and closing the
+  table once that screen is gone (figgie.com's own Leave Game does it the
+  other way round, which can crash the page);
+* while ON with AUTO, wraps the socket's incoming-event dispatch to drop
+  figgie.com's empty "match closed" messages that arrive mid-game or in a
+  lobby it's opening (they're about other tables), and turns `window.alert`
+  into a log entry.
 
 It was written against figgie.com web **v1.3.7.1** (November 2026). It relies
 on the app's internals, so a site update can break it; the panel then reports

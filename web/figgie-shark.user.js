@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Figgie Shark
 // @namespace    figgie-bot
-// @version      0.13.1
+// @version      0.13.2
 // @description  Lets figgie-bot's Bayesian card-counting SharkBot trade your seat on figgie.com - only at tables where every other seat is a figgie.com bot.
 // @match        https://www.figgie.com/play*
 // @match        https://figgie.com/play*
@@ -1707,7 +1707,7 @@
       console.info('[figgie-shark] already running on this page; reload the page to load a different copy.');
       return window.__figgieShark;
     }
-    console.info('[figgie-shark] 0.13.1 loaded: switch the Shark panel (bottom right) ON. With AUTO on it opens tables of bots and plays round after round until you switch it OFF.');
+    console.info('[figgie-shark] 0.13.2 loaded: switch the Shark panel (bottom right) ON. With AUTO on it opens tables of bots and plays round after round until you switch it OFF.');
     const S = Core.SUIT_KEYS;
     const SYM = Core.SUIT_SYMBOLS;
     const CFG = {
@@ -1827,6 +1827,39 @@
         /* storage blocked */
       }
     }
+    // Uncaught errors on the page (figgie.com's or this script's), with what the script was doing,
+    // kept in this browser for a post-mortem: __figgieShark.errors, or after a reload
+    // JSON.parse(localStorage['figgieShark.errors']).  figgie.com's own harmless noise (wake locks,
+    // interrupted sounds) is left out.
+    const ERR_KEY = 'figgieShark.errors';
+    app.errors = loadJSON(ERR_KEY) || [];
+    function noteError(kind, msg, stack) {
+      msg = String(msg || '');
+      if (kind !== 'alert' && /wake lock|play\(\) request was interrupted|NotAllowedError/i.test(msg)) return;
+      const last = app.errors[app.errors.length - 1];
+      if (last && last.msg === msg.slice(0, 300) && Date.now() - Date.parse(last.at) < 10000) return; // a burst
+      app.errors.push({
+        at: new Date().toISOString(),
+        kind,
+        msg: msg.slice(0, 300),
+        stack: String(stack || '').slice(0, 1500),
+        status: app.status,
+        move: app.move ? app.move.phase : null,
+        screen: app.store ? app.store.currentScreen : null,
+        hidden: document.hidden,
+      });
+      if (app.errors.length > 30) app.errors.shift();
+      try {
+        window.localStorage.setItem(ERR_KEY, JSON.stringify(app.errors));
+      } catch (e) {
+        /* storage blocked */
+      }
+    }
+    window.addEventListener('error', (ev) => noteError('error', ev.message, ev.error && ev.error.stack));
+    window.addEventListener('unhandledrejection', (ev) => {
+      const r = ev.reason;
+      noteError('rejection', (r && r.message) || r, r && r.stack);
+    });
     const clockNow = () => {
       const t = app.store && app.store.timeLeftInMatch;
       return typeof t === 'number' ? Math.round(t * 10) / 10 : null;
@@ -1889,10 +1922,58 @@
           }
         }
         sock.on('onEventCompleteTrade', onTradeEvent);
+        guardSocket(sock);
         app.socket = sock;
         app.roundKey = null; // resync the round from the trade tape
       }
     }
+
+    // figgie.com's "match closed" message carries no match id, and its game screen and lobby both
+    // answer it by sending you home (the lobby with a blocking "Match has been cancelled due to
+    // inactivity" alert).  So when an old table closes (one this page left without closing it, a
+    // reload's, or one the server times out), you get thrown out of the table you're playing.
+    // While ON with AUTO, such a message is dropped if it arrives at the game screen or a table
+    // being opened, unless this page asked to close or leave a table in the last 10 seconds.
+    function guardSocket(sock) {
+      if (sock.__figgieSharkGuard || typeof sock.emitEvent !== 'function') return;
+      sock.__figgieSharkGuard = true;
+      if (typeof sock.onAnyOutgoing === 'function') {
+        sock.onAnyOutgoing((name) => {
+          if (name === 'closeMatch' || name === 'leftMatchLobby') app.closeSentAt = Date.now();
+        });
+      }
+      const emitEvent = sock.emitEvent;
+      sock.emitEvent = function (args) {
+        if (Array.isArray(args) && args[0] === 'onMatchClosed') {
+          if (staleClose()) {
+            noteError('ignored', "figgie.com's 'match closed' arrived during play (an old table closing); ignored", '');
+            console.info("[figgie-shark] ignored figgie.com's 'match closed' (an old table closing, not this one).");
+            return undefined;
+          }
+          app.closeHeardAt = Date.now();
+        }
+        return emitEvent.call(this, args);
+      };
+    }
+    function staleClose() {
+      const st = app.store;
+      if (!app.enabled || !app.autoNext || !st || Date.now() - (app.closeSentAt || 0) < 10000) return false;
+      if (app.move && (app.move.phase === 'lobby' || app.move.phase === 'start')) return true;
+      return st.isViewingGameScreen === true || st.currentScreen === 'Game';
+    }
+
+    // figgie.com also reports such things with the browser's alert(), which stops the whole page,
+    // this script included, until someone clicks OK.  While ON with AUTO nobody may be there, so
+    // the message goes to the console and __figgieShark.errors instead.
+    const nativeAlert = typeof window.alert === 'function' ? window.alert.bind(window) : null;
+    window.alert = function (msg) {
+      if (app.enabled && app.autoNext) {
+        noteError('alert', `figgie.com said: ${msg}`, '');
+        console.info(`[figgie-shark] figgie.com said: ${msg}`);
+        return undefined;
+      }
+      return nativeAlert ? nativeAlert(msg) : undefined;
+    };
 
     // Only the public part of a fill: suit, price, buyer seat, seller seat.
     function onTradeEvent(payload) {
@@ -2204,15 +2285,22 @@
     }
 
     // A tab you can't see gets no animation frames, and figgie.com only finishes a screen change
-    // (and unmounts the old screen) when its transition animation has run.  So any frame the page
-    // asked for and hasn't had within a quarter second is delivered from this script's clock
-    // instead: a table move then completes in a background tab too.  In a visible tab frames come
-    // every 16 ms and this never fires.
+    // (and unmounts the old screen) when its transition animation has run.  So once the page has
+    // had no frame for half a second, any frame it asked for a quarter second ago or more is
+    // delivered from this script's clock instead: a table move then completes in a background tab
+    // too.  In a visible tab this does nothing.
     const flushFrames = (function keepFramesComing() {
       const nativeRaf = typeof window.requestAnimationFrame === 'function' ? window.requestAnimationFrame.bind(window) : null;
       const nativeCaf = typeof window.cancelAnimationFrame === 'function' ? window.cancelAnimationFrame.bind(window) : null;
       if (!nativeRaf || !nativeCaf) return () => {};
       const pending = new Map(); // native id -> { cb, at }
+      // a frame of our own every frame tells whether frames are coming at all
+      let lastFrame = performance.now();
+      const probe = () => {
+        lastFrame = performance.now();
+        nativeRaf(probe);
+      };
+      nativeRaf(probe);
       window.requestAnimationFrame = function (cb) {
         let id = 0;
         id = nativeRaf((ts) => {
@@ -2228,6 +2316,12 @@
       return function flush() {
         if (!pending.size) return;
         const now = performance.now();
+        if (!document.hidden && now - lastFrame < 500) {
+          // frames are coming, so the browser delivers them; anything this old was cancelled some
+          // other way and must never run
+          for (const [id, e] of pending) if (now - e.at > 5000) pending.delete(id);
+          return;
+        }
         const due = [];
         for (const [id, e] of pending) if (now - e.at > 250) due.push([id, e]);
         for (const [id, e] of due) {
@@ -2294,6 +2388,7 @@
       } catch (e) {
         app.error = String((e && e.message) || e);
         app.status = 'Error: ' + app.error;
+        noteError('script', app.error, e && e.stack);
         console.error('[figgie-shark]', e);
       }
       render();
@@ -2450,21 +2545,23 @@
     }
 
     // ----- moving to a fresh table ---------------------------------------------------------------
-    // Done the way a person would, through figgie.com's own handlers: the in-game "Leave Game"
-    // (which closes a table no other person sits at), "Create New" → "Create Game" (standard),
-    // "Allow players to join?" → No, then a bot on each empty seat; the full table then deals
-    // after its countdown, and the loop above takes over.  Each step has a deadline; if one passes,
-    // the move stops where it is, says why, and AUTO stays at whatever table it is at.
+    // Done the way a person would, mostly through figgie.com's own handlers: leave the game screen
+    // for the home screen and close the old table (what Leave Game does for a host sitting alone,
+    // in the safe order), "Create New" → "Create Game" (standard), "Allow players to join?" → No,
+    // then a bot on each empty seat; the full table then deals after its countdown, and the loop
+    // above takes over.  Each step has a deadline; if one passes, the move stops where it is, says
+    // why, and AUTO stays at whatever table it is at.
     const MOVE_FAILS = {
       leave: 'leaving the table timed out',
       create: 'creating a table timed out',
       lobby: 'seating the bots timed out',
       start: 'the new table never dealt',
     };
-    const newMove = (phase, bots) => ({ phase, until: Date.now() + CFG.moveStepMs, to: null, left: null, bots, at: 0, tabAt: 0, addAt: 0, retries: 0 });
+    const newMove = (phase, bots) => ({ phase, until: Date.now() + CFG.moveStepMs, from: null, to: null, left: null, bots, at: 0, closedAt: 0, tabAt: 0, addAt: 0, retries: 0 });
     function beginMove(st, why) {
       saveLearner();
       app.move = newMove('leave', Math.max(3, Math.min(4, app.nPlayers - 1)));
+      app.move.from = st.matchId;
       console.info(`[figgie-shark] ${why}: moving to a fresh table.`);
     }
     // after a failed move, wait a while before trying again (at this table or the home screen)
@@ -2494,9 +2591,14 @@
       m.at = 0;
     }
     function failMove(reason) {
+      const m = app.move;
       app.move = null;
       app.moveFailed = reason;
       app.moveFailedAt = Date.now();
+      // a lobby we opened and are giving up on: close it, or the server will close it later "for
+      // inactivity" in the middle of whatever table we're at by then
+      const st = app.store;
+      if (m && m.to && (m.phase === 'lobby' || m.phase === 'start') && st && st.socket && typeof st.socket.closeMatch === 'function') st.socket.closeMatch(m.to);
       console.warn(`[figgie-shark] table move failed: ${reason}. It tries again in ${Math.round(CFG.moveRetryMs / 60000)} minutes, or open a table yourself and it carries on there.`);
       return false;
     }
@@ -2513,16 +2615,34 @@
       if (now > m.until) return failMove(MOVE_FAILS[m.phase]);
       const onGame = st.isViewingGameScreen === true || st.currentScreen === 'Game';
       if (m.phase === 'leave') {
-        if (homeTab()) {
-          movePhase(m, 'create', CFG.moveStepMs);
-        } else if (!m.at) {
-          // the confirmation behind the in-game menu's Leave Game
-          const dlg = findFiber((p) => typeof p.onConfirm === 'function' && 'isUserMatchHost' in p && 'numHumans' in p && p.action !== 'endMatch');
-          if (!dlg) return failMove("figgie.com's Leave Game wasn't found");
-          m.at = now;
-          dlg.memoizedProps.onConfirm();
+        // figgie.com's own Leave Game closes the table and then changes screens, so the server's
+        // replies (a player list emptied by the closing) can reach the game screen while it is
+        // still animating out, and an empty player list crashes it (the page goes blank).  So:
+        // change screens first, the same way Leave Game does, and close the table once the game
+        // screen is gone.
+        if (findFiber((p) => !!p.route && p.route.name === 'Game')) {
+          if (!m.at) {
+            const screen = findFiber((p) => !!p.route && p.route.name === 'Game' && !!p.navigation && typeof p.navigation.dispatch === 'function');
+            if (!screen) return failMove("figgie.com's game screen couldn't be left");
+            m.at = now;
+            screen.memoizedProps.navigation.dispatch({ type: 'RESET', payload: { index: 0, routes: [{ name: 'Home', params: { playfabId: st.user && st.user.playfabId } }] } });
+          }
+          app.status = 'The bots are nearly out of chips: leaving for a fresh table…';
+          return true;
         }
-        app.status = 'The bots are nearly out of chips: leaving for a fresh table…';
+        // nobody else sits at the old table, so close it (what Leave Game does for a lone host), and
+        // wait (5 s at most) for the server's "match closed" before opening the next table, so that
+        // the message can't land in the new lobby and throw us out of it
+        if (!m.closedAt) {
+          if (m.from && st.socket && typeof st.socket.closeMatch === 'function') st.socket.closeMatch(m.from);
+          if (typeof st.resetMatchDefaults === 'function') st.resetMatchDefaults();
+          m.closedAt = now;
+        }
+        if ((app.closeHeardAt || 0) < m.closedAt && now - m.closedAt < 5000) {
+          app.status = 'Closing the old table…';
+          return true;
+        }
+        movePhase(m, 'create', CFG.moveStepMs);
         return true;
       }
       if (m.phase === 'create') {
@@ -2552,6 +2672,16 @@
           }
         }
         app.status = 'Opening a fresh table…';
+        return true;
+      }
+      if ((m.phase === 'lobby' || m.phase === 'start') && !onGame && homeTab() && !findFiber((p) => !!p.route && p.route.name === 'Lobby')) {
+        // thrown out of the new table's lobby (figgie.com does that on some messages about other
+        // tables): close it so it can't do the same later, and open another
+        if (m.to && st.socket && typeof st.socket.closeMatch === 'function') st.socket.closeMatch(m.to);
+        noteError('kicked', `thrown out of the lobby of ${m.to}; opening another table`, '');
+        m.left = m.to;
+        m.to = null;
+        movePhase(m, 'create', CFG.moveStepMs);
         return true;
       }
       if (m.phase === 'lobby') {
