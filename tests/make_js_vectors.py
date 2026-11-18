@@ -192,6 +192,28 @@ class ResaleProbe(SharkBot):
             self.snaps.append(snap)
 
 
+class LockedProbe(SharkBot):
+    """The shark, keeping snapshots of the turns in which it holds at least locked_sell cards of
+    a suit that is the goal with P >= locked_p and another player bids for it (the locked_sell
+    rule; fixed-tick snapshots almost never catch one)."""
+
+    name = "lockprobe"
+
+    def on_start(self, info):
+        super().on_start(info)
+        self.snaps = []
+
+    def act(self, m):
+        P = self.params
+        hand = m.hand
+        bids = [m.best_bid(s) for s in range(NUM_SUITS)]
+        candidate = any(hand[s] >= P.locked_sell and b is not None and b.player != self.me for s, b in enumerate(bids))
+        snap = take_snapshot(m._game, self.me, m.tick) if candidate else None
+        super().act(m)  # (the check below reads the valuation this turn computed)
+        if snap is not None and any(hand[s] >= P.locked_sell and bids[s] is not None and self._val.p_goal[s] >= P.locked_p for s in range(NUM_SUITS)):
+            self.snaps.append(snap)
+
+
 def expected(snap: dict, params: dict) -> dict:
     me, H, n = snap["me"], snap["hand_size"], snap["n_players"]
     kitty, pot = max(0, 40 - H * n), (200 // n) * n  # three players: one card dealt to nobody, $198 pot
@@ -311,6 +333,23 @@ def main() -> None:
                 cases.append(s)
                 n_probe += 1
         print(f"{n_probe} snapshots of turns that traded resale stock")
+    if params.get("locked_sell", 0) > 0:
+        # turns holding a locked goal majority while someone bids for the goal: oracles know the goal
+        REGISTRY["lockprobe"] = LockedProbe
+        probe = "lockprobe" + spec[len("shark"):]
+        n_lock = n_sold = 0
+        for gi in range(200):
+            if n_lock >= 24:
+                break
+            lineup = [probe, "oracle", "oracle", "oracle"]
+            bots = [make_bot(s) for s in lineup]
+            Game(bots, rules=Rules(n_players=len(lineup)), seed=7000 + gi).run()
+            for s in bots[0].snaps[:3]:
+                s["expected"] = expected(s, params)
+                cases.append(s)
+                n_lock += 1
+                n_sold += any(op[0] == "sell" for op in s["expected"]["ops"])
+        print(f"{n_lock} snapshots holding a locked goal majority ({n_sold} of them selling)")
     learner_rounds = round_start_vectors(cases, params)
     reading = reading_vectors()
     out = Path(__file__).with_name("js_vectors.json")

@@ -45,6 +45,7 @@ per 4-minute round including the $50 ante:
 | v11 | 10 | +$735 | +$73.5 | ±44 | lets go of suits it has given up on sooner |
 | v12 | 10 | +$799 | +$79.9 | ±34 | learns which cheap offers resell, from the tape |
 | **v13** | 10 | **+$989** | **+$98.9** | ±32 | learns which market signals to trust at a table; resale learner hardened |
+| v13.3 | 11 | +$810 | +$73.6 | ±37 | takes each new quote at once; sells spares of a locked goal; plays unattended across 3 tables |
 
 Since v3 it has been profitable in every 10-round test, and v8 to v13 ended
 68 of their 70 rounds with the true goal as their favourite (v7: 74% on the
@@ -285,9 +286,11 @@ carries on (ON and AUTO are remembered for the tab).
 While it's ON with AUTO it also keeps figgie.com from interrupting the run:
 the site announces some things (such as an old table being closed for
 inactivity) with a browser pop-up that freezes the page until someone clicks
-OK, and acts on "match closed" messages meant for other tables by throwing
-you out of the one you're playing. The script logs those pop-ups instead and
-ignores the stray messages.
+OK, and sends "match closed" messages that don't say which table they mean.
+The script logs those pop-ups instead, holds a "match closed" that arrives
+mid-round for up to 3 seconds (if the clock ticks on, it was about another
+table and is dropped; if not, the round is over and it opens a fresh table),
+and leaves any round whose clock stands still for 15 seconds.
 
 For runs nobody watches, install it with a userscript manager instead
 ([Tampermonkey](https://www.tampermonkey.net/) or
@@ -371,7 +374,10 @@ figgie.com is an Expo / React Native Web app talking socket.io to
   `timeLeftInMatch`, and your own player's `startingHand` / `currentHand` /
   `chipCount`;
 * listens to the socket's `onEventCompleteTrade` (suit, price, buyer and
-  seller seats only) so every fill reaches the bot in order;
+  seller seats only) so every fill reaches the bot in order, and to
+  `onEventSetTradeValue`, so that it weighs taking each new bid or offer the
+  moment it appears instead of on its next 250 ms check (figgie.com's bots
+  are quick to grab a $1 offer or a rich bid);
 * sends orders with `setTradeValue`, `completeTrade` and `cancelTrade`,
   applying the same checks as the UI (prices 1-99, bids must beat the bid,
   never crossing its own quotes);
@@ -391,10 +397,10 @@ figgie.com is an Expo / React Native Web app talking socket.io to
 * leaves a table by sending the game screen home first and closing the
   table once that screen is gone (figgie.com's own Leave Game does it the
   other way round, which can crash the page);
-* while ON with AUTO, wraps the socket's incoming-event dispatch to drop
-  figgie.com's empty "match closed" messages that arrive mid-game or in a
-  lobby it's opening (they're about other tables), and turns `window.alert`
-  into a log entry.
+* while ON with AUTO, wraps the socket's incoming-event dispatch to hold
+  figgie.com's empty "match closed" messages that arrive mid-round, passing
+  each one on only if the round's clock (`onDecrementTimer`) stops, and
+  turns `window.alert` into a log entry.
 
 It was written against figgie.com web **v1.3.7.1** (November 2026). It relies
 on the app's internals, so a site update can break it; the panel then reports
@@ -461,6 +467,10 @@ which is what makes the 6th card of a 10-card goal worth chasing.
   option value of waiting for the market to reveal the goal. Both judge a suit
   by the highest P(goal) it has had lately, a memory with a 30-second
   half-life (`sticky_halflife`), so a brief dip doesn't trigger a dump.
+  One exception (v13.3, `locked_sell=7` live): holding 7+ cards of a suit
+  that is 95%+ the goal, the majority is safe whatever happens to one card
+  (a goal suit has 8 or 10 cards), so a spare is worth its $10 payout and
+  sells into any bid of $11 or more.
 * **Quote** every suit inside its value, giving up 20% + 15% (adverse
   selection) + $1 on bids and 20% + $1 on offers. Open at 30% of the limit on
   an empty book, step up $1 every 3 seconds, penny competitors, never pay
@@ -624,20 +634,21 @@ command uses the figgie.com settings), serve the folder, and open the harness;
 it should print `PASS`:
 
 ```bash
-python tests/make_js_vectors.py smart_consensus=0.8 smart_colour_fade=90 resale_cheap=2 resale_bid=true resale_learn=true resale_robust=true read_learn=true
+python tests/make_js_vectors.py smart_consensus=0.8 smart_colour_fade=90 resale_cheap=2 resale_bid=true resale_learn=true resale_robust=true read_learn=true locked_sell=7
 ```
 
 ```bash
 python -m http.server 8765 --bind 127.0.0.1
 ```
 
-Then open <http://localhost:8765/tests/js_harness.html>. Last run (v13):
+Then open <http://localhost:8765/tests/js_harness.html>. Last run (v13.3):
 snapshots from 2-, 3-, 4- and 5-player games; posteriors equal to 3e-16,
-card values to 6e-14 dollars. All orders were identical: 438 orders from 273
+card values to 6e-14 dollars. All orders were identical: 504 orders from 298
 snapshots with the figgie.com settings (`smart_consensus=0.8
 smart_colour_fade=90 resale_cheap=2 resale_bid=true resale_learn=true
-resale_robust=true read_learn=true`), 21 of those snapshots turns that traded
-resale cards, with the learned-resale model after every turn equal to the last
+resale_robust=true read_learn=true locked_sell=7`), 21 of those snapshots
+turns that traded resale cards and 25 turns holding a locked goal majority (5
+of them selling into a bid), with the learned-resale model after every turn equal to the last
 bit, and at 36 round starts (12 models, each at the same table, a new one, and
 carried from another page), and the bid-reading learner equal over 20 random
 12-round histories. (v12's settings: 567 orders from 289 snapshots; v11's

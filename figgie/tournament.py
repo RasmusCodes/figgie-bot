@@ -15,6 +15,7 @@ from .engine import NUM_SUITS, SUITS, Bot, Game, GameResult, Rules, Trade
 from .shark import (
     SHARK_LIVE,
     SHARK_LIVE_V12,
+    SHARK_LIVE_V13,
     SHARK_V1,
     SHARK_V2,
     SHARK_V3,
@@ -68,10 +69,15 @@ def _shark_v12(**kw) -> SharkBot:
     return SharkBot(**{**SHARK_LIVE_V12, **kw})
 
 
+def _shark_v13(**kw) -> SharkBot:
+    return SharkBot(**{**SHARK_LIVE_V13, **kw})
+
+
 REGISTRY: Dict[str, Callable[..., Bot]] = {
     "shark": SharkBot,
     "sharklive": _shark_live,
     "sharkv12": _shark_v12,
+    "sharkv13": _shark_v13,
     "sharkv1": _shark_v1,
     "sharkv2": _shark_v2,
     "sharkv3": _shark_v3,

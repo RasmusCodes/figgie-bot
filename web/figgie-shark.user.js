@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Figgie Shark
 // @namespace    figgie-bot
-// @version      0.13.2
+// @version      0.13.3
 // @description  Lets figgie-bot's Bayesian card-counting SharkBot trade your seat on figgie.com - only at tables where every other seat is a figgie.com bot.
 // @match        https://www.figgie.com/play*
 // @match        https://figgie.com/play*
@@ -694,6 +694,8 @@
       adverse_offer: 0.0,
       read_learn: false,
       read_learn_at: 60,
+      locked_sell: 0,
+      locked_p: 0.95,
     };
     const round2 = (x) => Math.round(x * 100) / 100;
 
@@ -1606,9 +1608,19 @@
           const bid = m.bestBid(s);
           if (bid !== null && bid.player !== this.me && hand[s] > 0) {
             const keep = v.sellTo[s][this.slot.get(bid.player)];
-            const val = Math.max(keep, this.sellFloor(s, v), this.holdFloor(s, v, m.tick));
+            let val;
+            let need;
+            if (P.locked_sell > 0 && hand[s] >= P.locked_sell && v.pGoal[s] >= P.locked_p) {
+              // the goal's majority is ours whatever we do with one card: it is worth its payout,
+              // so any bid above that is profit (locked_sell)
+              val = keep;
+              need = P.take_edge;
+            } else {
+              val = Math.max(keep, this.sellFloor(s, v), this.holdFloor(s, v, m.tick));
+              need = P.take_edge + takeFrac * val;
+            }
             const gain = bid.price - val;
-            if (gain >= P.take_edge + takeFrac * val) {
+            if (gain >= need) {
               if (best === null || gain > best[0]) best = [gain, false, s, bid.price, false];
             } else if (r && r.held(s) > 0) {
               // a resale card: sell it into the first bid that pays the resale target, unless the
@@ -1707,7 +1719,7 @@
       console.info('[figgie-shark] already running on this page; reload the page to load a different copy.');
       return window.__figgieShark;
     }
-    console.info('[figgie-shark] 0.13.2 loaded: switch the Shark panel (bottom right) ON. With AUTO on it opens tables of bots and plays round after round until you switch it OFF.');
+    console.info('[figgie-shark] 0.13.3 loaded: switch the Shark panel (bottom right) ON. With AUTO on it opens tables of bots and plays round after round until you switch it OFF.');
     const S = Core.SUIT_KEYS;
     const SYM = Core.SUIT_SYMBOLS;
     const CFG = {
@@ -1729,6 +1741,7 @@
       // setting resets to medium whenever the page reloads, so it can't be inferred from it)
       tableBots: 'hard',
       nextRoundGiveUpMs: 60000, // a table that won't deal the next round this long after we asked: move
+      deadRoundMs: 15000, // a round whose clock stands still this long has died on the server: move
       moveRetryMs: 120000, // after a failed move, try again this much later
     };
     // Settings for figgie.com's own bots, on top of the simulator defaults.  Every one of them bids
@@ -1742,8 +1755,10 @@
     // what it learned from round to round and, saved in this browser, from table to table.
     // v13 also learns from each round's revealed goal how far to trust the colour reading and the
     // consensus here (read_learn), and hardens the resale model against a poisoned tape
-    // (resale_robust); the resale model saved by v12 loads into it.
-    const LIVE_PARAMS = { smart_consensus: 0.8, smart_colour_fade: 90, resale_cheap: 2, resale_bid: true, resale_learn: true, resale_robust: true, read_learn: true };
+    // (resale_robust); the resale model saved by v12 loads into it.  v13.3 sells spare cards of
+    // a goal whose majority it has locked (7+ held) into any bid above their $10 payout
+    // (locked_sell).
+    const LIVE_PARAMS = { smart_consensus: 0.8, smart_colour_fade: 90, resale_cheap: 2, resale_bid: true, resale_learn: true, resale_robust: true, read_learn: true, locked_sell: 7 };
     const LEARNER_KEY = 'figgieShark.resaleLearner.v12';
     const READER_KEY = 'figgieShark.reading.v13';
     const app = {
@@ -1835,7 +1850,7 @@
     app.errors = loadJSON(ERR_KEY) || [];
     function noteError(kind, msg, stack) {
       msg = String(msg || '');
-      if (kind !== 'alert' && /wake lock|play\(\) request was interrupted|NotAllowedError/i.test(msg)) return;
+      if (kind !== 'alert' && /wake ?lock|play\(\) request was interrupted|NotAllowedError/i.test(msg)) return;
       const last = app.errors[app.errors.length - 1];
       if (last && last.msg === msg.slice(0, 300) && Date.now() - Date.parse(last.at) < 10000) return; // a burst
       app.errors.push({
@@ -1917,11 +1932,13 @@
         if (app.socket) {
           try {
             app.socket.off('onEventCompleteTrade', onTradeEvent);
+            app.socket.off('onEventSetTradeValue', onQuoteEvent);
           } catch (e) {
             /* old socket gone */
           }
         }
         sock.on('onEventCompleteTrade', onTradeEvent);
+        sock.on('onEventSetTradeValue', onQuoteEvent);
         guardSocket(sock);
         app.socket = sock;
         app.roundKey = null; // resync the round from the trade tape
@@ -1930,10 +1947,11 @@
 
     // figgie.com's "match closed" message carries no match id, and its game screen and lobby both
     // answer it by sending you home (the lobby with a blocking "Match has been cancelled due to
-    // inactivity" alert).  So when an old table closes (one this page left without closing it, a
-    // reload's, or one the server times out), you get thrown out of the table you're playing.
-    // While ON with AUTO, such a message is dropped if it arrives at the game screen or a table
-    // being opened, unless this page asked to close or leave a table in the last 10 seconds.
+    // inactivity" alert).  When a table this page left without closing (a reload's) is closed for
+    // inactivity minutes later, the message may be about that old table, and the server may also
+    // have stopped the game you're in (live, twice, its clock stood still from that moment).  So
+    // mid-round it is held for up to 3 seconds: if the clock ticks on, it was about another table
+    // and is dropped; if not, figgie.com gets it and goes home, and AUTO opens a fresh table.
     function guardSocket(sock) {
       if (sock.__figgieSharkGuard || typeof sock.emitEvent !== 'function') return;
       sock.__figgieSharkGuard = true;
@@ -1943,23 +1961,49 @@
         });
       }
       const emitEvent = sock.emitEvent;
+      sock.__figgieSharkEmit = emitEvent;
       sock.emitEvent = function (args) {
-        if (Array.isArray(args) && args[0] === 'onMatchClosed') {
-          if (staleClose()) {
-            noteError('ignored', "figgie.com's 'match closed' arrived during play (an old table closing); ignored", '');
-            console.info("[figgie-shark] ignored figgie.com's 'match closed' (an old table closing, not this one).");
-            return undefined;
+        if (Array.isArray(args)) {
+          const name = args[0];
+          if (name === 'onDecrementTimer' || name === 'onIncrementTimer') app.lastTickAt = Date.now();
+          if (name === 'onMatchClosed') {
+            if (holdClose()) {
+              // it may be about an old table, or the server may have closed this one: hold it, and
+              // see whether this table's clock goes on
+              app.heldClose = { args, sock: this, at: Date.now() };
+              return undefined;
+            }
+            app.closeHeardAt = Date.now();
           }
-          app.closeHeardAt = Date.now();
         }
         return emitEvent.call(this, args);
       };
     }
-    function staleClose() {
+    // A held "match closed": if this table's clock ticked since, it was about another table (drop
+    // it); if not, after 3 seconds, it was this one, so let figgie.com act on it (it goes home).
+    function settleHeldClose() {
+      const h = app.heldClose;
+      if (!h) return;
+      const now = Date.now();
+      if ((app.stallAt || 0) > h.at) h.at = now; // the page stalled since: ticks may still be queued, so wait again
+      if ((app.lastTickAt || 0) > h.at) {
+        app.heldClose = null;
+        noteError('ignored', "figgie.com's 'match closed' arrived during play while this table's clock ran on (an old table closing); ignored", '');
+        console.info("[figgie-shark] ignored figgie.com's 'match closed' (an old table closing, not this one).");
+      } else if (now - h.at > 3000) {
+        app.heldClose = null;
+        app.closeHeardAt = now;
+        noteError('released', "figgie.com's 'match closed' was for this table (its clock stopped); passed on", '');
+        h.sock.__figgieSharkEmit.call(h.sock, h.args);
+      }
+    }
+    // Hold a "match closed" that arrives mid-round (ON with AUTO, no close or leave of ours in the
+    // last 10 s).  Anywhere else, figgie.com acts on it as usual; a lobby being opened that it
+    // throws us out of is closed and replaced (stepMove).
+    function holdClose() {
       const st = app.store;
-      if (!app.enabled || !app.autoNext || !st || Date.now() - (app.closeSentAt || 0) < 10000) return false;
-      if (app.move && (app.move.phase === 'lobby' || app.move.phase === 'start')) return true;
-      return st.isViewingGameScreen === true || st.currentScreen === 'Game';
+      if (!app.enabled || !app.autoNext || !st || app.move || Date.now() - (app.closeSentAt || 0) < 10000) return false;
+      return app.tradingOpen && (st.isViewingGameScreen === true || st.currentScreen === 'Game');
     }
 
     // figgie.com also reports such things with the browser's alert(), which stops the whole page,
@@ -1974,6 +2018,27 @@
       }
       return nativeAlert ? nativeAlert(msg) : undefined;
     };
+
+    // A new bid or offer: weigh taking it at once, instead of on the next timer tick (up to ~0.45 s
+    // later); figgie.com's bots are quick to grab a $1 offer or a rich bid.  Run as a microtask,
+    // after every listener of this message, so that the store's own has put the quote in the book
+    // whichever was registered first (a copy that loads with the page registers before it).
+    function onQuoteEvent() {
+      queueMicrotask(quickTake);
+    }
+    function quickTake() {
+      try {
+        if (!app.enabled || !app.bot || !app.tradingOpen || app.humans.length || app.move) return;
+        if (Date.now() < app.pendingTakeUntil) return; // waiting for our hit/lift to fill
+        const traded = app.tradeQueue.length > 0;
+        while (app.tradeQueue.length) feedTrade(app.tradeQueue.shift());
+        diffQuotes(traded);
+        app.lastTake = Date.now();
+        app.bot.act(makeMarket(app.tick), { takeOnly: true });
+      } catch (e) {
+        noteError('script', String((e && e.message) || e), e && e.stack);
+      }
+    }
 
     // Only the public part of a fill: suit, price, buyer seat, seller seat.
     function onTradeEvent(payload) {
@@ -2377,8 +2442,12 @@
 
     function loop() {
       try {
+        const now = Date.now();
+        if (app.lastLoopAt && now - app.lastLoopAt > 2000) app.stallAt = now; // the page itself was stalled
+        app.lastLoopAt = now;
         flushFrames();
         saveRun();
+        settleHeldClose();
         if (!checkPageAlive()) {
           render();
           return;
@@ -2432,6 +2501,10 @@
 
       const t = st.timeLeftInMatch;
       app.tradingOpen = !st.isRoundEnded && !st.isPaused && !st.isReplayMode && !st.timerHasEnded && typeof t === 'number' && (st.isStandardMode === false || t > 0);
+      if (!app.tradingOpen || t !== app.clockSeen) {
+        app.clockSeen = t;
+        app.clockSeenAt = Date.now();
+      }
       // (timerHasEnded stays set for a few seconds into the next round, while its clock is full)
       if (st.isRoundEnded || (st.timerHasEnded && (st.isStandardMode === false || !(t > 0)))) {
         // chips are read after the ante has been taken, so add it back for the round's P&L
@@ -2483,6 +2556,14 @@
       }
       app.status = 'Trading';
       const now = Date.now();
+      // A round whose clock has stood still for 15 s while this page ran smoothly has died on the
+      // server's side (it stops sending anything): leave it for a fresh table.
+      if (st.isStandardMode !== false && now - app.clockSeenAt > CFG.deadRoundMs && now - (app.stallAt || 0) > CFG.deadRoundMs && app.autoNext && !moveBlocked(now)) {
+        noteError('frozen', `this table's clock stood at ${t}s for ${Math.round((now - app.clockSeenAt) / 1000)} s; leaving it`, '');
+        cancelOurQuotes();
+        beginMove(st, 'the round froze');
+        return;
+      }
       if (now < app.pendingTakeUntil) return; // waiting for our hit/lift to fill
       if (now - app.lastAct >= CFG.actMs) {
         app.lastAct = now;
