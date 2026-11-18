@@ -139,6 +139,13 @@ class SharkParams:
     # read_learn_at ticks into the round.
     read_learn: bool = False
     read_learn_at: int = 60
+    # >0: holding at least this many cards of a suit that is the goal with P(goal) >= locked_p,
+    # sell one into any bid that beats what keeping it is worth by take_edge: no take_frac margin,
+    # no waiting premium (hold_floor), no churn guard.  A goal suit has 8 or 10 cards, so keeping 6
+    # wins the bonus outright, and with 7 or more a spare card is worth its payout and no more.
+    # (v13.3: an $11 bid for the goal with 7 held went unsold live, the margin wanting $13.)
+    locked_sell: int = 0
+    locked_p: float = 0.95
 
 
 # The smart-money reading of v2-v6, calibrated on a single recorded round.
@@ -198,9 +205,11 @@ SHARK_V8 = dict(fill_lr_offer=1.0, sticky_halflife=60.0, adverse_offer=1.0)
 SHARK_V10 = dict(sticky_halflife=60.0, adverse_offer=1.0)
 
 # What the userscript plays at figgie.com (LIVE_PARAMS in web/figgie-shark.user.js): the
-# production bot, `sharklive` in the simulator.  v12's live settings stay as `sharkv12`.
+# production bot, `sharklive` in the simulator.  v12's and v13's live settings stay as
+# `sharkv12` and `sharkv13`.
 SHARK_LIVE_V12 = dict(smart_consensus=0.8, smart_colour_fade=90, resale_cheap=2, resale_bid=True, resale_learn=True)
-SHARK_LIVE = dict(SHARK_LIVE_V12, resale_robust=True, read_learn=True)
+SHARK_LIVE_V13 = dict(SHARK_LIVE_V12, resale_robust=True, read_learn=True)
+SHARK_LIVE = dict(SHARK_LIVE_V13, locked_sell=7)
 
 
 class SharkBot(Bot):
@@ -517,9 +526,15 @@ class SharkBot(Bot):
             bid = m.best_bid(s)
             if bid is not None and bid.player != self.me and hand[s] > 0:
                 keep = v.sell_to[s][self.slot[bid.player]]
-                val = max(keep, self.sell_floor(s, v), self.hold_floor(s, v, m.tick))
+                if P.locked_sell > 0 and hand[s] >= P.locked_sell and v.p_goal[s] >= P.locked_p:
+                    # the goal's majority is ours whatever we do with one card: it is worth its
+                    # payout, so any bid above that is profit
+                    val, need = keep, P.take_edge
+                else:
+                    val = max(keep, self.sell_floor(s, v), self.hold_floor(s, v, m.tick))
+                    need = P.take_edge + take_frac * val
                 gain = bid.price - val
-                if gain >= P.take_edge + take_frac * val:
+                if gain >= need:
                     if best is None or gain > best[0]:
                         best = (gain, False, s, bid.price, False)
                 elif r is not None and r.held(s) > 0:

@@ -26,6 +26,7 @@ v10); `shark` is always the current one.
 | v11 | 10 | +$735 | +$73.5 | ±44 |
 | v12 | 10 | +$799 | +$79.9 | ±34 |
 | v13 | 10 | +$989 | +$98.9 | ±32 |
+| v13.3 | 11 | +$810 | +$73.6 | ±37 |
 
 ---
 
@@ -1428,3 +1429,111 @@ So while ON with AUTO:
 The browser pane went away before these last changes had run through a "match
 closed" from an old table; they were written against the captured messages
 and figgie.com's code.
+
+## v13.3: quicker takes, and spares of a locked goal
+
+The user noticed three things live: the bot didn't sell into $10+ bids for a
+suit it thought unlikely, didn't sell into $10+ bids for the goal while
+holding 7+ of it, and didn't buy $1 offers at once. The v12 and v13 logs (20
+rounds, every quote and trade, at 1-second resolution; note that any trade
+clears the whole book at figgie.com) show how often each happened, and a
+replay of the bot at each one shows why:
+
+| Situation | Times | We took it | figgie.com's bots took it | Cleared by another trade |
+|---|---|---|---|---|
+| $1 offers before the last 15 s | 60 | 37 | 15 | 7 |
+| $11+ bids on a suit under 15% likely, cards held | 6 | 4 | 1 | 1 |
+| $11+ bids on the goal, 7+ held | 2 | 1 (at $16) | 0 | 1 |
+
+* **The goal with 7+ held.** The unsold one was an $11 bid for the goal
+  (99%) with 7 hearts held: the card was worth $9.91 to the bot, and the
+  take rule's margin ($1 + 20%) wanted $12.89. Mid-round the waiting premium
+  (a goal card "may yet fetch $25 from bonus chasers") would have held out
+  for even more. But a goal suit has 8 or 10 cards, so keeping 6 wins the
+  bonus outright: with 7 or more, a spare card is worth its payout and no
+  more. New rule `locked_sell=7` (live): with 7+ cards of a suit that is 95%+
+  the goal, sell into any bid that beats keeping the card by $1, without the
+  margin, the waiting premium or the churn guard. In the arena it is neutral
+  (−0.03 $/round ±0.05, every table inside its noise), as it should be: the
+  simulator's bots seldom bid over $10 for a goal someone has locked.
+  figgie.com's bots do.
+* **Unlikely suits.** Of the two the bot didn't hit, one was a $12 bid on
+  diamonds (19%) with 6 held: if diamonds were the goal, 6 would win the
+  bonus outright and 5 might not, which the valuation priced at $11.14 a
+  card. Holding was right. The other was an $11 bid 22 seconds in on
+  diamonds (14%) with 3 held, where the option value of waiting (dead cards
+  still fetch about $5 early in a round) put the card at $10.39; selling
+  would have gained about $2 in expectation. Left as it is.
+* **$1 offers.** Of the 15 that figgie.com's bots took first, 13 were on
+  dead suits in the last 15-30 seconds, about half blocked by the resale cap
+  of 2 cards per suit and the rest judged unprofitable by the learner. In 2
+  the replayed bot did want the card: a race. The bot's own $1 buys resell
+  almost every time, even near the bell (69 of 70, at $2.80-3.60 on
+  average). Raising the cap to 3 a suit (or 3 a suit and 6 in all) was
+  neutral on average in the arena but lost a little at the tables that bait
+  the resale model (baited −0.78, bait-pair −0.99 $/round, inside their
+  noise; arena score −0.18 and −0.14), so the caps stay; the fix for $1
+  offers is the speed below.
+* **Speed.** The userscript looked for trades to take every 250 ms (on a
+  200 ms poll), so a new quote could wait up to ~0.45 s. It now weighs each
+  new bid or offer the moment figgie.com announces it (`onEventSetTradeValue`).
+  Live (2026-11-18), most takes went out 0-3 ms after the quote reached the
+  page. Re-valuing on every quote costs the bot 0.4 ms at the 90th
+  percentile. What it still loses are races against figgie.com's own bots,
+  which run on the server with no network round trip.
+
+### A "match closed" that was meant for us
+
+The live test of v13.3 froze twice, each time just as figgie.com sent its
+empty "match closed" mid-round. 0.13.2 had dropped it as "an old table
+closing", but the game's clock stopped at that moment and never moved again,
+so it was about the table being played. Seen with tables abandoned by page
+reloads, it came every five minutes (01:19:59, 01:24:59, 01:30:02),
+presumably a server-side sweep of inactive tables that ends the player's
+current game too.
+
+So mid-round the message is now held for up to 3 seconds. If the clock ticks
+(`onDecrementTimer`) in that time, it was about another table and is
+dropped. If not, figgie.com gets it, goes home, and AUTO opens a fresh table.
+While a table is being opened, the message goes straight through, and the
+existing recovery replaces a lobby the script is thrown out of. As a
+backstop, a round whose clock has stood still for 15 seconds, while the page
+itself ran smoothly, is left for a fresh table. Live, the third such message
+was released after 3 seconds and the script had a new private lobby with 3
+bots seated 12 seconds after the clock stopped.
+
+### Live test (2026-11-18)
+
+Eleven rounds against Hard bots, unattended once started, at three tables
+(the script opened all three itself, and moved from the second to the third
+when a bot ended a round under $100):
+
+| Table | Rounds (P&L) |
+|---|---|
+| 1 | +86, −38, then figgie.com: "You are logged in on another device" |
+| 2 | +119, +104, −17, +85, +135, then a move (a bot under $100) |
+| 3 | +17, +157, +111, +51 |
+
++$810 in all, +$73.6 a round (±37), inside the noise of v13's +$98.9 (±32).
+In all 9 rounds whose bell was recorded, the bot's favourite was the goal (at
+P ≥ 0.98). In 6 of them it held 6-8 of its cards (+$85 to +$157); in the
+other 3 it held none (−17, +17, +51).
+
+* **The locked goal.** Holding 7 spades at P(goal) 1.0, four seconds from the
+  bell, it sold the spare into an $11 bid: what the old margin would have
+  refused below $13.
+* **$1 offers.** At tables 2 and 3 others offered 55 cards at $1. The bot got
+  18, figgie.com's bots 16, and another trade cleared the book before anyone
+  took the other 20 or so. The bot's $1 fills landed a median 170 ms after
+  the offer appeared (p90 484 ms), counting the round trip to the server.
+* **A bug the test found.** At table 3 only 4 of 265 takes went out within 5
+  ms of their quote. That copy had loaded before the socket connected, so its
+  quote listener ran before the store's and looked at a book without the new
+  quote, which then waited for the 250 ms check. The reaction now runs as a
+  microtask after every listener. Patched into the running page, 44 of the
+  next 49 takes went out within 50 ms (most 5-12 ms).
+* **"You are logged in on another device"** (01:41, table 1): the same guest
+  account connected elsewhere, or a reconnect counted as one, and figgie.com
+  dropped the page to its login spinner. The script logged the pop-up instead
+  of freezing on it and, a pasted copy, could only say "reload". A copy in a
+  userscript manager reloads after 90 seconds there.
